@@ -1,0 +1,18 @@
+# Secrets and local config
+.env
+.env.local
+.env.*.local
+
+# Dependencies (when added)
+node_modules/
+
+# Large local GTFS export (~270 MB); re-download per data/README.md
+data/GTFSExport/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/

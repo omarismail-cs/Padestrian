@@ -1,0 +1,34 @@
+{
+  "groceries": {
+    "path": "groceries.geojson",
+    "format": "GeoJSON FeatureCollection",
+    "source": "OpenStreetMap via Overpass Turbo",
+    "license": "ODbL (OpenStreetMap)",
+    "featureCount": 129,
+    "geometryTypes": {
+      "Polygon": 114,
+      "Point": 15
+    },
+    "exportedAt": "2026-05-22T01:28:58Z"
+  },
+  "gtfs": {
+    "path": "GTFSExport/",
+    "format": "GTFS (General Transit Feed Specification)",
+    "agency": "OC Transpo",
+    "source": "https://www.octranspo.com",
+    "feedVersion": "S1000495",
+    "feedStartDate": "20260508",
+    "feedEndDate": "20260608",
+    "files": [
+      "agency.txt",
+      "calendar.txt",
+      "calendar_dates.txt",
+      "feed_info.txt",
+      "routes.txt",
+      "shapes.txt",
+      "stops.txt",
+      "stop_times.txt",
+      "trips.txt"
+    ]
+  }
+}
