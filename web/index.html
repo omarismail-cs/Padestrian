@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Padestrian — map</title>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Padestrian</h1>
+      <p id="status">Loading…</p>
+    </header>
+    <aside id="panel">
+      <p class="panel-title">Layers</p>
+      <label class="layer-row">
+        <input type="checkbox" id="layer-listings" checked />
+        <span class="swatch swatch-listing" aria-hidden="true"></span>
+        Listings <span class="dim">(demo)</span>
+      </label>
+      <label class="layer-row">
+        <input type="checkbox" id="layer-groceries" checked />
+        <span class="swatch swatch-grocery" aria-hidden="true"></span>
+        Groceries
+      </label>
+      <label class="layer-row">
+        <input type="checkbox" id="layer-smoke" checked />
+        <span class="swatch swatch-walk" aria-hidden="true"></span>
+        Walk zones <span class="dim">(smoke test)</span>
+      </label>
+      <label class="layer-row">
+        <input type="checkbox" id="layer-stops" />
+        <span class="swatch swatch-transit" aria-hidden="true"></span>
+        Transit stops <span class="dim">(~5.8k)</span>
+      </label>
+      <p class="panel-foot"><a href="/basemap.html">Basemap test</a></p>
+    </aside>
+    <div id="map"></div>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.js"></script>
+    <script src="/config.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

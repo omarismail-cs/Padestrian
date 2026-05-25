@@ -1,82 +1,64 @@
 # Padestrian
 
-A smarter apartment-hunting tool for people who commute on foot.
+A smarter apartment-hunting tool for people who commute on foot—real walking routes to transit and groceries, not crow-fly “Walk Scores.”
 
-Most rental sites lean on generic “Walk Scores” that measure distance as the crow flies. That ignores fences, highways, missing sidewalks, and the routes you actually take—especially in winter. **Padestrian** uses real walking paths and official transit data so you can see which homes are genuinely steps from a bus stop, train station, and groceries—not just close on paper.
+## Quick start
 
-## How it works
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -e .
 
-```mermaid
-flowchart LR
-  listings[Rental listings] --> filter[Filter & match]
-  essentials[Transit stops + groceries] --> isochrones[Walking zones]
-  isochrones --> filter
-  filter --> map[Interactive map]
+cp .env.example .env            # ORS + Mapbox keys
+# OC Transpo GTFS → data/GTFSExport/ (see data/README.md)
+
+python -m padestrian build-essentials
+python -m padestrian validate-listings   # exports data/listings.geojson
+python -m padestrian serve        # http://127.0.0.1:8765
 ```
 
-1. **Gather listings** — Scan local rental sites for the latest apartments, prices, and addresses.
-2. **Map the essentials** — Pin permanent bus stops, train stations, and major grocery stores from authoritative sources (GTFS + OSM).
-3. **Calculate the real walk** — Use pedestrian routing (not straight-line distance) to build walking zones—for example, a 10-minute walk—from each stop and store.
-4. **Filter the noise** — Keep only listings that fall inside **both** a transit zone and a grocery zone.
-5. **Visualize** — Plot matches on an interactive, color-coded map so budget and commute fit in one glance.
+After changing `.env`, restart `serve` and hard-refresh the browser (Ctrl+Shift+R).
 
-## Why it matters
+## Commands
 
-Finding a truly walkable place used to mean juggling rental tabs, Google Maps, and guesswork about winter walks. Padestrian removes that friction: affordable, car-free-friendly homes you can evaluate in one view.
+| Command | Purpose |
+|---------|---------|
+| `build-essentials` | GTFS → `stops.geojson`, groceries → `groceries-points.geojson` |
+| `seed-listings` | Regenerate demo `data/listings.json` (180 Ottawa mocks) |
+| `validate-listings` | Check listings JSON → `listings.geojson` for the map |
+| `build-zones` | Batch 10‑min walk zones for all groceries (ORS, cached) |
+| `smoke-isochrone` | Test 10‑min walk zones for one stop + one grocery |
+| `serve` | Local map (Mapbox GL JS) |
+| `check-mapbox` | Verify `MAPBOX_ACCESS_TOKEN` in `.env` |
 
-## Project layout
+## Map
+
+- **[Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/)** v3, style `streets-v12`
+- On `serve`, writes `web/config.js` from `.env`; the page sets `mapboxgl.accessToken` from that
+- **Basemap test:** http://127.0.0.1:8765/basemap.html
+- **Token check:** http://127.0.0.1:8765/config.js (suffix should match terminal)
+
+## Layout
 
 ```
-padestrian/
-├── .env.example      # API key template (copy to .env)
-├── data/
-│   ├── groceries.geojson   # Grocery / supermarket locations (OSM)
-│   ├── GTFSExport/         # OC Transpo GTFS (gitignored, large)
-│   ├── manifest.json       # Dataset metadata
-│   └── README.md
-└── README.md
+padestrian/     Python CLI
+web/            Map UI
+data/           GeoJSON + GTFS (GTFSExport/ gitignored)
 ```
-
-## Setup
-
-1. Copy the environment template and add your keys:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Place or refresh the OC Transpo GTFS export in `data/GTFSExport/` (see [data/README.md](data/README.md)). That folder is not committed because of size; `groceries.geojson` is included in the repo.
-
-3. API keys (see `.env.example` for signup links):
-
-   | Key | Role in Padestrian |
-   |-----|---------------------|
-   | **OpenRouteService** | Pedestrian routes and walking-time isochrones |
-   | **Mapbox** | Interactive map and listing visualization |
-
-Never commit `.env` or paste live tokens into the repo.
-
-## Data sources
-
-| Dataset | Source | Used for |
-|---------|--------|----------|
-| `data/groceries.geojson` | OpenStreetMap (Overpass) | Grocery walking zones |
-| `data/GTFSExport/` | OC Transpo GTFS | Stop locations (bus, O-Train, etc.) |
-
-Licenses: OSM data under [ODbL](https://www.openstreetmap.org/copyright); OC Transpo subject to their terms of use.
 
 ## Roadmap
 
-| Phase | Goal | Status |
-|-------|------|--------|
-| **1 — Essentials map** | Stops from GTFS + groceries from GeoJSON | In progress — data on disk |
-| **2 — Walking zones** | ORS isochrones (e.g. 10 min) around each stop and store | Planned |
-| **3 — Listings** | Scrape or ingest Ottawa rental listings (addresses + price) | Planned |
-| **4 — Filter** | Intersect listings with transit ∩ grocery zones | Planned |
-| **5 — UI** | Mapbox map: zones, stops, stores, matching listings | Planned |
+1. Essentials GeoJSON — done  
+2. Demo listings on map — done (`listings.json` / `listings.geojson`)  
+3. Walking zones — `build-zones` (groceries); smoke test for one stop  
+4. Filter listings ∩ walk zones — planned  
 
-**Now:** Phase 1 foundations (OC Transpo GTFS, Ottawa grocery POIs, routing/map API keys). **Next:** extract stop coordinates from GTFS, generate pedestrian isochrones, then wire listings and the map.
+```bash
+# ~129 ORS calls, ~3 min with default delay; resumes from cache if interrupted
+python -m padestrian build-zones
 
-## Status
+# Try first 3 groceries only
+python -m padestrian build-zones --grocery-limit 3
+```
 
-Early build: data and configuration only—no scraper, isochrone pipeline, or map UI yet. The pieces above match the end-to-end flow Padestrian is designed for.
+Data: [data/README.md](data/README.md)

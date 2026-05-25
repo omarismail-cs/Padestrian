@@ -3,11 +3,27 @@
 .env.local
 .env.*.local
 
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
 # Dependencies (when added)
 node_modules/
 
 # Large local GTFS export (~270 MB); re-download per data/README.md
 data/GTFSExport/
+
+# Generated walk zones (smoke-isochrone / build-zones)
+data/isochrones/
+data/zones/
+
+# Generated on `padestrian serve` (contains your Mapbox token)
+web/config.js
 
 # OS / editor
 .DS_Store
