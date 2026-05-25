@@ -12,8 +12,10 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Dependencies (when added)
+# Node / Next.js
 node_modules/
+.next/
+out/
 
 # Large local GTFS export (~270 MB); re-download per data/README.md
 data/GTFSExport/
@@ -23,8 +25,8 @@ data/isochrones/
 data/zones/
 data/listings-scored.geojson
 
-# Generated on `padestrian serve` (contains your Mapbox token)
-web/config.js
+# Junction at public/data → data/ (do not commit copies of generated GeoJSON)
+public/data/
 
 # OS / editor
 .DS_Store

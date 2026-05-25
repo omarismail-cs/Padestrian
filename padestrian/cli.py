@@ -14,7 +14,6 @@ from padestrian.listings import (
     validate_catalog,
     write_seed_catalog,
 )
-from padestrian.serve import DEFAULT_PORT, run_server
 from padestrian.paths import (
     GROCERIES_POINTS_PATH,
     GROCERIES_PATH,
@@ -101,7 +100,7 @@ def cmd_smoke_isochrone(args: argparse.Namespace) -> int:
     print(f"Requesting {args.minutes:g}-minute walking zones from OpenRouteService...")
     output = run_smoke_isochrone(minutes=args.minutes)
     print(f"Wrote {output}")
-    print("View on the map: python -m padestrian serve")
+    print("View on the map: npm run dev  ->  http://localhost:3000")
     return 0
 
 
@@ -150,13 +149,7 @@ def cmd_filter_listings(args: argparse.Namespace) -> int:
     print(f"  grocery zones : {stats.grocery_zone_source}")
     print(f"  transit zones : {stats.transit_zone_source}")
     print(f"\n  -> {LISTINGS_SCORED_PATH}")
-    print("\nRestart serve + hard-refresh to see filtered listings on the map.")
-    return 0
-
-
-def cmd_serve(args: argparse.Namespace) -> int:
-    """Run local map viewer at http://127.0.0.1:<port>/"""
-    run_server(port=args.port, open_browser=not args.no_browser)
+    print("\nHard-refresh http://localhost:3000 to see filtered listings on the map.")
     return 0
 
 
@@ -268,23 +261,6 @@ def main(argv: list[str] | None = None) -> int:
         help="Walk-time budget to match against zones (default: 10)",
     )
     filter_parser.set_defaults(func=cmd_filter_listings)
-
-    serve_parser = subparsers.add_parser(
-        "serve",
-        help="Local map at http://127.0.0.1:8765 (Mapbox token from .env)",
-    )
-    serve_parser.add_argument(
-        "--port",
-        type=int,
-        default=DEFAULT_PORT,
-        help=f"Port number (default: {DEFAULT_PORT})",
-    )
-    serve_parser.add_argument(
-        "--no-browser",
-        action="store_true",
-        help="Do not open a browser tab automatically",
-    )
-    serve_parser.set_defaults(func=cmd_serve)
 
     check_parser = subparsers.add_parser(
         "check-mapbox",
