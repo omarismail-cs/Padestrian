@@ -1,18 +1,29 @@
 # Padestrian
 
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![Mapbox](https://img.shields.io/badge/Mapbox-4264FB?style=flat-square&logo=mapbox&logoColor=white)
+
 **Find rentals you can actually live in without a car — on one map.**
 
 Padestrian is a full-stack Ottawa rental explorer built around a simple idea: **walkability should mean a real walk**, not a straight line on a map. Most listing sites hand you a generic score that ignores highways, missing sidewalks, and how long winter walks actually feel. This project scores each apartment using **pedestrian routing**, official **transit stop data**, and real **grocery locations**, then shows you the results instantly.
 
 ## Screenshots
 
-**Map** — color-coded rentals, groceries, transit stops, and a listing card with walkability badge:
-
-![Padestrian map with walkable listing popup](public/images/screenshot-map.png)
-
-**Filters & layers** — rent, bedrooms, walkable-only toggle, legend, and grocery/transit/Kijiji sources:
-
-![Padestrian filter panel and layer controls](public/images/screenshot-filters.png)
+<table>
+  <tr>
+    <td width="65%" valign="top">
+      <strong>Map</strong> — color-coded rentals, groceries, transit stops, and a listing card with walkability badge<br /><br />
+      <img src="public/images/screenshot-map.png" alt="Padestrian map with walkable listing popup" width="100%" />
+    </td>
+    <td width="35%" valign="top">
+      <strong>Filters &amp; layers</strong> — rent, bedrooms, walkable-only toggle, legend, and grocery/transit/Kijiji sources<br /><br />
+      <img src="public/images/screenshot-filters.png" alt="Padestrian filter panel and layer controls" width="100%" />
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -41,17 +52,20 @@ Padestrian puts that in one place: hover a pin, see rent and address, know at a 
 
 ## How it works (the interesting part)
 
-```text
-Listings (JSON)     Groceries (OSM)        Transit (GTFS)
-       │                    │                      │
-       └────────────► 10-min walk zones ◄─────────┘
-                    (OpenRouteService isochrones)
-                              │
-                              ▼
-              Point-in-polygon + nearest-stop check
-                              │
-                              ▼
-                 listings-scored.geojson → Map
+```mermaid
+flowchart TB
+    L["Listings (JSON)"]
+    G["Groceries (OSM)"]
+    T["Transit (GTFS)"]
+    W["10-min walk zones<br/>(OpenRouteService isochrones)"]
+    P["Point-in-polygon + nearest-stop check"]
+    M["listings-scored.geojson → Map"]
+
+    L --> W
+    G --> W
+    T --> W
+    W --> P
+    P --> M
 ```
 
 1. **Listings** land on the map with real lat/lon from municipal address points (demo set) or imported Kijiji ads.  
@@ -75,32 +89,39 @@ No database — datasets are GeoJSON and JSON on disk, rebuilt with a CLI and se
 
 ---
 
-## Quick start
+<details>
+<summary>🛠️ Local Setup / Quick Start</summary>
+
+<br />
 
 **Requirements:** Node 18+, Python 3.11+, API keys for Mapbox and OpenRouteService.
+
+#### Step 1: Prerequisites & API Keys
+
+Copy the example env file and add your API keys before running the data pipeline or the map.
+
+```bash
+cp .env.example .env            # ORS_API_KEY, MAPBOX_ACCESS_TOKEN
+# .env.local → NEXT_PUBLIC_MAPBOX_TOKEN=<same mapbox token>
+```
+
+#### Step 2: Backend & Data Pipeline Setup
+
+Create the Python environment, install the CLI, then build and score the datasets the map reads.
 
 ```bash
 # Clone, then:
 python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
 pip install -e .
-npm install
-
-cp .env.example .env            # ORS_API_KEY, MAPBOX_ACCESS_TOKEN
-# .env.local → NEXT_PUBLIC_MAPBOX_TOKEN=<same mapbox token>
 
 python -m padestrian build-essentials
 python -m padestrian validate-listings
 python -m padestrian build-zones
 python -m padestrian filter-listings
-
-npm run dev
 ```
 
-Open **http://localhost:3000** — the map should load with listings already scored.  
-After changing data: `Ctrl+Shift+R` to hard refresh.
-
-First-time grocery refresh (optional):
+**First-time grocery refresh (optional):**
 
 ```bash
 python -m padestrian fetch-groceries
@@ -109,13 +130,28 @@ python -m padestrian build-zones
 python -m padestrian filter-listings
 ```
 
-Kijiji import (optional, needs `playwright install chromium`):
+**Kijiji import (optional, needs `playwright install chromium`):**
 
 ```bash
 python -m padestrian scrape-listings --pages 3 --max 30 --append
 python -m padestrian validate-listings
 python -m padestrian filter-listings
 ```
+
+#### Step 3: Frontend Setup & Run
+
+Install frontend dependencies and start the Next.js dev server.
+
+```bash
+npm install
+
+npm run dev
+```
+
+Open **http://localhost:3000** — the map should load with listings already scored.  
+After changing data: `Ctrl+Shift+R` to hard refresh.
+
+</details>
 
 ---
 
