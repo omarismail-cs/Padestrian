@@ -85,6 +85,7 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
       id: string,
       url: string,
       onReady: () => void,
+      pixelRatio = 2,
     ) => {
       if (map.hasImage(id)) {
         onReady()
@@ -94,7 +95,7 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
         if (err || !image) {
           console.warn(`${id} failed to load`, err)
         } else if (!map.hasImage(id)) {
-          map.addImage(id, image, { pixelRatio: 2 })
+          map.addImage(id, image, { pixelRatio })
         }
         onReady()
       })

@@ -35,13 +35,9 @@ def check_mapbox_token() -> int:
 
     print()
     if ok:
-        print("Token works. Run: python -m padestrian serve")
+        print("Token works. Run: npm run dev")
         return 0
 
     print("Fix token at https://account.mapbox.com/access-tokens/")
     print("Use a public pk. token with STYLES:READ, STYLES:TILES, FONTS:READ; no URL restrictions.")
     return 1
-
-
-if __name__ == "__main__":
-    raise SystemExit(check_mapbox_token())

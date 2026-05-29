@@ -102,16 +102,6 @@ python -m padestrian use-listings --source kijiji
 # then validate-listings && filter-listings
 ```
 
-### Regenerate map pin icons
-
-Colored house pins and the red grocery cart pin are generated from artwork under `scripts/assets/`:
-
-```bash
-python scripts/generate_map_icons.py
-```
-
-Outputs 64×64 PNGs in `public/images/` (walkable green, grocery-only lime, transit violet, neither slate, default gray; groceries stay red).
-
 ## CLI commands
 
 | Command | Purpose |
@@ -140,7 +130,6 @@ app/              Next.js app entry + globals.css (popup shells)
 data/             GeoJSON, zones, listings JSON, GTFS input
 public/images/    Map marker PNGs
 public/data/      Junction → data/ for frontend fetches
-scripts/          Icon generation (generate_map_icons.py)
 ```
 
 For dataset details and Overpass instructions, see [data/README.md](data/README.md).
