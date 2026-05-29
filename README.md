@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Mapbox](https://img.shields.io/badge/Mapbox-4264FB?style=flat-square&logo=mapbox&logoColor=white)
 
-**Find rentals you can actually live in without a car — on one map.**
+**Find rentals you can actually live in without a car, on one map.**
 
 Padestrian is a full-stack Ottawa rental explorer built around a simple idea: **walkability should mean a real walk**, not a straight line on a map. Most listing sites hand you a generic score that ignores highways, missing sidewalks, and how long winter walks actually feel. This project scores each apartment using **pedestrian routing**, official **transit stop data**, and real **grocery locations**, then shows you the results instantly.
 
@@ -14,12 +14,15 @@ Padestrian is a full-stack Ottawa rental explorer built around a simple idea: **
 
 <table>
   <tr>
-    <td width="65%" valign="top">
-      <strong>Map</strong> — color-coded rentals, groceries, transit stops, and a listing card with walkability badge<br /><br />
+    <td width="65%" valign="middle" align="center">
+      <div align="left">
+        <strong>Map</strong>: color-coded rentals, groceries, transit stops, and a listing card with walkability badge
+      </div>
+      <br />
       <img src="public/images/screenshot-map.png" alt="Padestrian map with walkable listing popup" width="100%" />
     </td>
-    <td width="35%" valign="top">
-      <strong>Filters &amp; layers</strong> — rent, bedrooms, walkable-only toggle, legend, and grocery/transit/Kijiji sources<br /><br />
+    <td width="35%" valign="middle">
+      <strong>Filters &amp; layers</strong>: rent, bedrooms, walkable-only toggle, legend, and grocery/transit/Kijiji sources<br /><br />
       <img src="public/images/screenshot-filters.png" alt="Padestrian filter panel and layer controls" width="100%" />
     </td>
   </tr>
@@ -43,7 +46,7 @@ Padestrian puts that in one place: hover a pin, see rent and address, know at a 
 
 - **Interactive Mapbox map** with dark/light theme, rent and bedroom filters, and a “walkable only” toggle  
 - **~180 demo listings** placed on real City of Ottawa address coordinates (not random pins)  
-- **Color-coded house markers** — walkable, grocery-only, transit-only, or neither  
+- **Color-coded house markers**: walkable, grocery-only, transit-only, or neither  
 - **Grocery + transit layers** you can turn on and off  
 - **Listing cards** on hover (price, beds/baths, address, Kijiji link when available)  
 - **Optional live Kijiji import** via the Python CLI (batch scrape → score → map)
@@ -70,11 +73,11 @@ flowchart TB
 
 1. **Listings** land on the map with real lat/lon from municipal address points (demo set) or imported Kijiji ads.  
 2. **Groceries** come from OpenStreetMap; **transit stops** from OC Transpo GTFS.  
-3. **Walk zones** are built with OpenRouteService — actual sidewalk/path routing for a **10-minute** budget, drawn as polygons around each store (and optionally stops).  
+3. **Walk zones** are built with OpenRouteService: actual sidewalk/path routing for a **10-minute** budget, drawn as polygons around each store (and optionally stops).  
 4. Each listing is scored: near grocery? near transit? **eligible** only when both are true.  
 5. The Next.js app loads the scored GeoJSON and paints pins by category.
 
-No database — datasets are GeoJSON and JSON on disk, rebuilt with a CLI and served to the frontend. That keeps the demo fast to clone and easy to inspect.
+No database. Datasets are GeoJSON and JSON on disk, rebuilt with a CLI and served to the frontend. That keeps the demo fast to clone and easy to inspect.
 
 ---
 
@@ -148,7 +151,7 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:3000** — the map should load with listings already scored.  
+Open **http://localhost:3000**. The map should load with listings already scored.  
 After changing data: `Ctrl+Shift+R` to hard refresh.
 
 </details>
@@ -177,7 +180,7 @@ Full dataset notes: [data/README.md](data/README.md).
 ## Project layout
 
 ```text
-padestrian/     Python CLI — ingest, zones, scoring, scrape
+padestrian/     Python CLI (ingest, zones, scoring, scrape)
 components/     Map UI (filters, popups, layers)
 app/            Next.js entry
 data/           Source + generated GeoJSON
@@ -187,4 +190,4 @@ public/images/  Map markers + README screenshots
 
 ---
 
-Built as a portfolio-grade geospatial demo: real APIs, real city open data, and a product story that solves an everyday problem — **where can I rent and still walk to the bus and the store?**
+Built as a portfolio-grade geospatial demo: real APIs, real city open data, and a product story that solves an everyday problem: **where can I rent and still walk to the bus and the store?**
