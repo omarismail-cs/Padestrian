@@ -49,6 +49,7 @@ Padestrian puts that in one place: hover a pin, see rent and address, know at a 
 - **Color-coded house markers**: walkable, grocery-only, transit-only, or neither  
 - **Grocery + transit layers** you can turn on and off  
 - **Listing cards** on hover (price, beds/baths, address, Kijiji link when available)  
+- **Check an address** in the sidebar: Ottawa autocomplete, then the same color-coded house pin and walkability badge as rentals (saved in your browser until you clear it)  
 - **Optional live Kijiji import** via the Python CLI (batch scrape → score → map)
 
 ---
@@ -75,7 +76,8 @@ flowchart TB
 2. **Groceries** come from OpenStreetMap; **transit stops** from OC Transpo GTFS.  
 3. **Walk zones** are built with OpenRouteService: actual sidewalk/path routing for a **10-minute** budget, drawn as polygons around each store (and optionally stops).  
 4. Each listing is scored: near grocery? near transit? **eligible** only when both are true.  
-5. The Next.js app loads the scored GeoJSON and paints pins by category.
+5. The Next.js app loads the scored GeoJSON and paints pins by category.  
+6. **Custom addresses** (sidebar) geocode in the browser via Mapbox, score with the same grocery-zone + nearest-transit rules as the Python CLI (Turf.js point-in-polygon), and merge into the listings layer as `source: "custom"` pins.
 
 No database. Datasets are GeoJSON and JSON on disk, rebuilt with a CLI and served to the frontend. That keeps the demo fast to clone and easy to inspect.
 
@@ -85,9 +87,9 @@ No database. Datasets are GeoJSON and JSON on disk, rebuilt with a CLI and serve
 
 | Layer | Tools |
 |-------|--------|
-| **Frontend** | Next.js 16, React 19, Mapbox GL, Tailwind |
+| **Frontend** | Next.js 16, React 19, Mapbox GL, Tailwind, Turf.js (client walk scoring) |
 | **Backend / data** | Python 3.11+, Shapely, httpx, Playwright (Kijiji) |
-| **Routing & map APIs** | OpenRouteService (walk isochrones), Mapbox (tiles + geocoding) |
+| **Routing & map APIs** | OpenRouteService (walk isochrones, CLI), Mapbox (tiles + geocoding + address autocomplete) |
 | **Data sources** | OC Transpo GTFS, OpenStreetMap groceries, City of Ottawa address points |
 
 ---
@@ -152,6 +154,7 @@ npm run dev
 ```
 
 Open **http://localhost:3000**. The map should load with listings already scored.  
+Use **Check an address** in the sidebar to score any Ottawa street address (needs `data/zones/grocery-10min.geojson` from `build-zones`).  
 After changing data: `Ctrl+Shift+R` to hard refresh.
 
 </details>
@@ -177,14 +180,44 @@ Full dataset notes: [data/README.md](data/README.md).
 
 ---
 
+## Deploying to Vercel
+
+The map and **Check an address** feature are fully static at runtime: no Python on Vercel. The browser geocodes via Mapbox and scores points against GeoJSON you ship in `public/data`.
+
+**Environment variables** (Vercel project settings):
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | Map tiles + address geocoding |
+
+Restrict the token to your production URL in the Mapbox dashboard.
+
+**Data files to include before deploy** (run the pipeline locally, then ensure these are served under `/data/` via `public/data` → `data/`):
+
+| File | Required for |
+|------|----------------|
+| `data/listings-scored.geojson` | Colored listing pins on the map |
+| `data/zones/grocery-10min.geojson` | Grocery walk scoring + custom address check |
+| `data/stops.geojson` | Nearest-transit fallback (already in repo) |
+| `data/groceries-points.geojson` | Grocery layer (already in repo) |
+
+Optional: `data/zones/transit-10min.geojson`, `data/isochrones/smoke.geojson` (fallback if merged zones are missing).
+
+Generated zone and scored listing files are gitignored by default. Either commit them for the demo deploy or add a CI step that runs `build-zones` and `filter-listings` and copies outputs into `data/` before `vercel build`.
+
+Custom addresses are stored in the user’s browser (`localStorage`) only; they are not written to the server.
+
+---
+
 ## Project layout
 
 ```text
 padestrian/     Python CLI (ingest, zones, scoring, scrape)
-components/     Map UI (filters, popups, layers)
+components/     Map UI (filters, popups, address search, layers)
+lib/            Browser geocoding + walk scoring (Vercel-safe, no Python at runtime)
 app/            Next.js entry
 data/           Source + generated GeoJSON
-public/data/    Served to the browser
+public/data/    Served to the browser (/data/… in the app)
 public/images/  Map markers + README screenshots
 ```
 

@@ -7,6 +7,16 @@ import type { GeoJSON } from "geojson"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { GroceryPopupCard } from "@/components/map/grocery-popup"
 import { ListingPopupCard } from "@/components/map/listing-popup"
+import {
+  mergeListingsWithCustom,
+  isCustomListing,
+} from "@/lib/custom-listing"
+import {
+  buildListingMapFilter,
+  isListingFeature,
+  passesListingFilters,
+} from "@/lib/listing-filters"
+import type { Feature, Point } from "geojson"
 
 const CENTER = { longitude: -75.6972, latitude: 45.4215 }
 const ZOOM   = 12.5
@@ -57,19 +67,28 @@ interface MapViewProps {
   layers: LayerVisibility
   onStatsUpdate: (total: number, walkable: number) => void
   theme: "light" | "dark"
+  customListing: Feature<Point> | null
+  flyToCustomKey: number
 }
 
 /** Same as grocery POI popups — scalar offset works with Mapbox anchor-bottom */
 const POI_POPUP_OFFSET = 12
 
-export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps) {
+export function MapView({
+  filters,
+  layers,
+  onStatsUpdate,
+  theme,
+  customListing,
+  flyToCustomKey,
+}: MapViewProps) {
   const mapRef = useRef<MapRef>(null)
   const [popupInfo, setPopupInfo]   = useState<PopupInfo | null>(null)
   const [cursor,    setCursor]      = useState<string>("auto")
   const popupHoverRef = useRef(false)
 
-  // Real GeoJSON data
-  const [listings,  setListings]  = useState<GeoJSON.FeatureCollection | null>(null)
+  const [baseListings, setBaseListings] = useState<GeoJSON.FeatureCollection | null>(null)
+  const [listings, setListings] = useState<GeoJSON.FeatureCollection | null>(null)
   const [groceries, setGroceries] = useState<GeoJSON.FeatureCollection | null>(null)
   const [stops,     setStops]     = useState<GeoJSON.FeatureCollection | null>(null)
   const [smokeData, setSmokeData] = useState<GeoJSON.FeatureCollection | null>(null)
@@ -142,7 +161,7 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
       .then(r => r.ok ? r.json() : Promise.reject())
       .catch(() => fetch("/data/listings.geojson").then(r => r.json()))
       .then((d: GeoJSON.FeatureCollection) => {
-        setListings(d)
+        setBaseListings(d)
         const props = d.features[0]?.properties
         setHasScores(
           d.features.length > 0 &&
@@ -173,79 +192,62 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
     }
   }, [layers.transit, stops])
 
-  // Build Mapbox GL filter expression from UI filter state
-  const listingFilter = useCallback(() => {
-    const exprs: unknown[] = ["all"]
+  useEffect(() => {
+    if (!baseListings) return
+    const merged = mergeListingsWithCustom(baseListings, customListing)
+    setListings(merged)
+    const anyScores = merged.features.some((f) => {
+      const p = f.properties
+      return p != null && ("near_grocery" in p || "near_transit" in p)
+    })
+    if (anyScores) setHasScores(true)
+  }, [baseListings, customListing])
 
-    const showStatic = layers.staticListings
-    const showKijiji = layers.kijijiListings
-    if (!showStatic && !showKijiji) {
-      // Valid expression filter that matches nothing (both listing sources off)
-      return ["==", ["get", "source"], "__none__"]
-    }
-    if (showStatic && !showKijiji) {
-      exprs.push(["!=", ["get", "source"], "kijiji"])
-    }
-    if (!showStatic && showKijiji) {
-      exprs.push(["==", ["get", "source"], "kijiji"])
-    }
+  useEffect(() => {
+    if (!customListing || flyToCustomKey === 0) return
+    const coords = customListing.geometry?.coordinates
+    if (!coords || coords.length < 2) return
+    const map = mapRef.current?.getMap()
+    if (!map) return
+    map.flyTo({
+      center: [coords[0], coords[1]],
+      zoom: 15,
+      duration: 1200,
+    })
+    const p = customListing.properties ?? {}
+    setPopupInfo({
+      longitude: coords[0],
+      latitude: coords[1],
+      properties: p,
+      layerId: "listings-symbol",
+    })
+  }, [customListing, flyToCustomKey])
 
-    if (filters.walkableOnly) {
-      exprs.push(["==", ["get", "eligible"], true])
-    }
-
-    if (filters.maxRent < 3500) {
-      exprs.push(["<=", ["get", "rent_cad"], filters.maxRent])
-    }
-
-    const selectedBeds = Array.isArray(filters.beds) && filters.beds.length > 0
-      ? filters.beds
-      : ["any"]
-    if (!selectedBeds.includes("any")) {
-      const clauses = selectedBeds.map((bed) => {
-        if (bed === "3") return ([">=", ["get", "bedrooms"], 3] as const)
-        return (["==", ["get", "bedrooms"], Number.parseInt(bed, 10)] as const)
-      })
-      if (clauses.length === 1) {
-        exprs.push(clauses[0])
-      } else {
-        exprs.push(["any", ...clauses])
-      }
-    }
-
-    return exprs.length === 1 ? true : exprs
-  }, [filters, layers.staticListings, layers.kijijiListings])
-
-  const passesSourceToggles = useCallback((source: unknown) => {
-    const isKijiji = String(source ?? "").toLowerCase() === "kijiji"
-    return (layers.kijijiListings && isKijiji) || (layers.staticListings && !isKijiji)
-  }, [layers.kijijiListings, layers.staticListings])
+  const listingFilter = useCallback(
+    () =>
+      buildListingMapFilter(filters, {
+        staticListings: layers.staticListings,
+        kijijiListings: layers.kijijiListings,
+      }),
+    [filters, layers.staticListings, layers.kijijiListings],
+  )
 
   // Recompute stats from raw data (not rendered features) so they're always accurate
   useEffect(() => {
     if (!listings) return
+    const layerState = {
+      staticListings: layers.staticListings,
+      kijijiListings: layers.kijijiListings,
+    }
     const features = listings.features.filter((f) => {
       const p = f.properties ?? {}
-      if (!passesSourceToggles(p.source)) return false
-      if (filters.walkableOnly && !p.eligible) return false
-      if (filters.maxRent < 3500 && Number(p.rent_cad) > filters.maxRent) return false
-      const selectedBeds = Array.isArray(filters.beds) && filters.beds.length > 0
-        ? filters.beds
-        : ["any"]
-      if (!selectedBeds.includes("any")) {
-        const beds = Number(p.bedrooms)
-        const bedMatch = selectedBeds.some((bed) => {
-          if (bed === "3") return beds >= 3
-          return beds === Number.parseInt(bed, 10)
-        })
-        if (!bedMatch) return false
-      }
-      return true
+      if (isCustomListing(p.source)) return false
+      return passesListingFilters(p, filters, layerState)
     })
     const total = features.length
     const walkable = features.filter(f => f.properties?.eligible).length
     onStatsUpdate(total, walkable)
-  }, [filters, listings, onStatsUpdate, passesSourceToggles])
+  }, [filters, listings, layers.staticListings, layers.kijijiListings, onStatsUpdate])
 
   const listingIconImage = useCallback((): mapboxgl.DataDrivenPropertyValueSpecification<string> => {
     if (!hasScores) return "house-default"
@@ -259,7 +261,8 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
   }, [hasScores])
 
   const isListingPopup = useCallback((info: PopupInfo | null) => {
-    return info?.properties.rent_cad != null
+    if (!info) return false
+    return isListingFeature(info.properties)
   }, [])
 
   const tryDismissPopup = useCallback(() => {
@@ -282,7 +285,10 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
     const feature =
       event.features?.find((f) => f.layer?.id === "listings-symbol") ??
       event.features?.find((f) => f.layer?.id === "groceries-symbol") ??
-      event.features?.find((f) => f.properties?.rent_cad != null) ??
+      event.features?.find((f) =>
+        f.layer?.id === "listings-symbol" ||
+        isListingFeature(f.properties ?? {}),
+      ) ??
       event.features?.[0]
     if (!feature) {
       setCursor("auto")
@@ -324,9 +330,9 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
   const formatPopup = (info: PopupInfo) => {
     const p = info.properties
 
-    if (p.rent_cad != null) {
+    if (isListingFeature(p)) {
       return (
-        <ListingPopupCard properties={p} showBadge={hasScores} />
+        <ListingPopupCard properties={p} showBadge={hasScores || isCustomListing(p.source)} />
       )
     }
 
@@ -516,7 +522,7 @@ export function MapView({ filters, layers, onStatsUpdate, theme }: MapViewProps)
           closeOnClick={false}
           offset={POI_POPUP_OFFSET}
           className={
-            popupInfo.properties.rent_cad != null
+            isListingFeature(popupInfo.properties)
               ? "padestrian-listing-popup"
               : popupInfo.properties.name != null
                 ? "padestrian-grocery-popup"

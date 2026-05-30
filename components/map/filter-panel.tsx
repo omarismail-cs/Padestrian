@@ -4,6 +4,8 @@ import { useState } from "react"
 import { ChevronLeft, Moon, Sun } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
 import { PedestrianToggle } from "@/components/ui/pedestrian-toggle"
+import { AddressSearch } from "@/components/map/address-search"
+import type { GeocodeResult } from "@/lib/geocode"
 import { cn } from "@/lib/utils"
 
 interface Filters {
@@ -28,6 +30,12 @@ interface FilterPanelProps {
   stats: { total: number; walkable: number }
   theme: "light" | "dark"
   onThemeToggle: () => void
+  hasCustomListing: boolean
+  isCheckingAddress: boolean
+  addressError: string | null
+  onCheckAddressQuery: (query: string) => void
+  onSelectAddress: (result: GeocodeResult) => void
+  onClearCustomAddress: () => void
 }
 
 const bedOptions = [
@@ -46,6 +54,12 @@ export function FilterPanel({
   stats,
   theme,
   onThemeToggle,
+  hasCustomListing,
+  isCheckingAddress,
+  addressError,
+  onCheckAddressQuery,
+  onSelectAddress,
+  onClearCustomAddress,
 }: FilterPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isEditingMaxRent, setIsEditingMaxRent] = useState(false)
@@ -179,6 +193,20 @@ export function FilterPanel({
         {/* Scrollable content */}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="p-5 space-y-5 pb-4">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-300 mb-3">
+                Check an address
+              </div>
+              <AddressSearch
+                hasCustomListing={hasCustomListing}
+                isChecking={isCheckingAddress}
+                error={addressError}
+                onCheckQuery={onCheckAddressQuery}
+                onSelectAddress={onSelectAddress}
+                onClear={onClearCustomAddress}
+              />
+            </div>
+
             {/* Filters section */}
             <div>
               <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-300 mb-4">

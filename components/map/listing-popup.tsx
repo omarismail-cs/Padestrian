@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { isCustomListing } from "@/lib/custom-listing"
 
 type WalkabilityBadge = "walkable" | "grocery" | "transit" | "neither"
 
@@ -82,7 +83,9 @@ interface ListingPopupCardProps {
 }
 
 export function ListingPopupCard({ properties, showBadge }: ListingPopupCardProps) {
+  const custom = isCustomListing(properties.source)
   const rent = Number(properties.rent_cad)
+  const showRent = !custom && Number.isFinite(rent) && rent > 0
   const beds = formatBedrooms(properties.bedrooms)
   const baths = formatBathrooms(properties.bathrooms)
   const badge = walkabilityBadge(properties)
@@ -115,21 +118,27 @@ export function ListingPopupCard({ properties, showBadge }: ListingPopupCardProp
         </span>
       ) : null}
 
-      <div className="flex items-baseline gap-x-2 whitespace-nowrap">
-        <span className="text-xl font-bold tracking-tight text-foreground">
-          ${rent.toLocaleString()}
-        </span>
-        <span className="text-sm font-normal text-muted-foreground">/mo</span>
-        {unitParts.length > 0 ? (
-          <span className="text-sm font-normal text-muted-foreground">
-            · {unitParts.join(" · ")}
+      {showRent ? (
+        <div className="flex items-baseline gap-x-2 whitespace-nowrap">
+          <span className="text-xl font-bold tracking-tight text-foreground">
+            ${rent.toLocaleString()}
           </span>
-        ) : null}
-      </div>
+          <span className="text-sm font-normal text-muted-foreground">/mo</span>
+          {unitParts.length > 0 ? (
+            <span className="text-sm font-normal text-muted-foreground">
+              · {unitParts.join(" · ")}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       {(street || cityLine) && (
         <>
-          <hr className="my-5 border-0 border-t border-border" />
+          {showRent ? (
+            <hr className="my-5 border-0 border-t border-border" />
+          ) : showBadge ? (
+            <hr className="my-4 border-0 border-t border-border" />
+          ) : null}
           <div
             className={cn(
               "space-y-1.5 text-sm leading-relaxed text-muted-foreground",

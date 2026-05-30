@@ -2,9 +2,17 @@
 
 import { useState, useCallback, useEffect } from "react"
 import dynamic from "next/dynamic"
+import type { Feature, Point } from "geojson"
 import { FilterPanel } from "@/components/map/filter-panel"
+import { geocodeAddress, type GeocodeResult } from "@/lib/geocode"
+import {
+  buildCustomListingFeature,
+  clearCustomAddressStorage,
+  loadCustomAddressFromStorage,
+  saveCustomAddressToStorage,
+} from "@/lib/custom-listing"
+import { scorePoint, ScoringDataError } from "@/lib/score-point"
 
-// Dynamically import MapView to avoid SSR issues with Mapbox
 const MapView = dynamic(
   () => import("@/components/map/map-view").then((mod) => mod.MapView),
   {
@@ -17,7 +25,7 @@ const MapView = dynamic(
         </div>
       </div>
     ),
-  }
+  },
 )
 
 export default function Page() {
@@ -41,7 +49,16 @@ export default function Page() {
     walkable: 0,
   })
 
-  // Apply theme class to html element
+  const [customListing, setCustomListing] = useState<Feature<Point> | null>(null)
+  const [isCheckingAddress, setIsCheckingAddress] = useState(false)
+  const [addressError, setAddressError] = useState<string | null>(null)
+  const [flyToCustomKey, setFlyToCustomKey] = useState(0)
+
+  useEffect(() => {
+    const stored = loadCustomAddressFromStorage()
+    if (stored) setCustomListing(stored)
+  }, [])
+
   useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark")
@@ -58,6 +75,53 @@ export default function Page() {
     setStats({ total, walkable })
   }, [])
 
+  const applyGeocodedAddress = useCallback(async (geocoded: GeocodeResult) => {
+    setIsCheckingAddress(true)
+    setAddressError(null)
+    try {
+      const score = await scorePoint(geocoded.lon, geocoded.lat)
+      const feature = buildCustomListingFeature(geocoded, score)
+      setCustomListing(feature)
+      saveCustomAddressToStorage(feature)
+      setFlyToCustomKey((k) => k + 1)
+    } catch (err) {
+      if (err instanceof ScoringDataError) {
+        setAddressError(err.message)
+      } else if (err instanceof Error && err.message.includes("Mapbox")) {
+        setAddressError(err.message)
+      } else {
+        setAddressError("Could not check that address. Try again.")
+      }
+    } finally {
+      setIsCheckingAddress(false)
+    }
+  }, [])
+
+  const handleCheckAddressQuery = useCallback(
+    async (query: string) => {
+      const geocoded = await geocodeAddress(query)
+      if (!geocoded) {
+        setAddressError("Address not found in Ottawa. Try a full street address.")
+        return
+      }
+      await applyGeocodedAddress(geocoded)
+    },
+    [applyGeocodedAddress],
+  )
+
+  const handleSelectAddress = useCallback(
+    (geocoded: GeocodeResult) => {
+      void applyGeocodedAddress(geocoded)
+    },
+    [applyGeocodedAddress],
+  )
+
+  const handleClearCustomAddress = useCallback(() => {
+    setCustomListing(null)
+    clearCustomAddressStorage()
+    setAddressError(null)
+  }, [])
+
   return (
     <main className="relative w-full h-screen overflow-hidden bg-background">
       <MapView
@@ -65,6 +129,8 @@ export default function Page() {
         layers={layers}
         onStatsUpdate={handleStatsUpdate}
         theme={theme}
+        customListing={customListing}
+        flyToCustomKey={flyToCustomKey}
       />
       <FilterPanel
         filters={filters}
@@ -74,6 +140,12 @@ export default function Page() {
         stats={stats}
         theme={theme}
         onThemeToggle={handleThemeToggle}
+        hasCustomListing={customListing != null}
+        isCheckingAddress={isCheckingAddress}
+        addressError={addressError}
+        onCheckAddressQuery={handleCheckAddressQuery}
+        onSelectAddress={handleSelectAddress}
+        onClearCustomAddress={handleClearCustomAddress}
       />
     </main>
   )
