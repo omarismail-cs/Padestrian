@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { ChevronDown, ChevronLeft, ChevronRight, Moon, Sun } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Moon, RefreshCw, Sun, X } from "lucide-react"
 import type { FeatureCollection } from "geojson"
 import { Slider } from "@/components/ui/slider"
 import { PedestrianToggle } from "@/components/ui/pedestrian-toggle"
@@ -73,6 +73,91 @@ export function FilterPanel({
   const [isOpen, setIsOpen] = useState(false)
   const [pressed, setPressed] = useState(false)
   const [kijijiListOpen, setKijijiListOpen] = useState(false)
+
+  type RefreshMode = "prune" | "scrape"
+  type RefreshState = "idle" | "loading" | "done" | "error"
+  const [refreshState, setRefreshState] = useState<RefreshState>("idle")
+  const [refreshMode, setRefreshMode] = useState<RefreshMode>("prune")
+  const [refreshMessage, setRefreshMessage] = useState("")
+  const [refreshStep, setRefreshStep] = useState("")
+  const [refreshProgress, setRefreshProgress] = useState(0)
+  const [modeMenuOpen, setModeMenuOpen] = useState(false)
+  const modeMenuRef = useRef<HTMLDivElement>(null)
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!modeMenuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (modeMenuRef.current && !modeMenuRef.current.contains(e.target as Node)) {
+        setModeMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [modeMenuOpen])
+
+  const triggerRefresh = async (mode: RefreshMode) => {
+    if (refreshState === "loading") return
+    setModeMenuOpen(false)
+    setRefreshMode(mode)
+    setRefreshState("loading")
+    setRefreshProgress(0)
+    setRefreshStep(mode === "scrape" ? "Scraping new listings…" : "Pruning dead listings…")
+    setRefreshMessage("")
+    if (resetTimer.current) clearTimeout(resetTimer.current)
+
+    try {
+      const res = await fetch("/api/refresh-kijiji", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode }),
+      })
+
+      if (!res.body) throw new Error("No response body")
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split("\n")
+        buffer = lines.pop() ?? ""
+        for (const line of lines) {
+          if (!line.trim()) continue
+          try {
+            const event = JSON.parse(line)
+            if (event.done) {
+              if (!event.ok) {
+                setRefreshState("error")
+                setRefreshMessage(event.message ?? "Unknown error")
+                resetTimer.current = setTimeout(() => setRefreshState("idle"), 5000)
+              } else {
+                setRefreshProgress(100)
+                setRefreshState("done")
+                setRefreshMessage(event.message ?? "Done")
+                resetTimer.current = setTimeout(() => {
+                  setRefreshState("idle")
+                  window.location.reload()
+                }, 6000)
+              }
+            } else {
+              if (event.step) setRefreshStep(event.step)
+              if (typeof event.progress === "number") setRefreshProgress(event.progress)
+            }
+          } catch {
+            // skip malformed line
+          }
+        }
+      }
+    } catch (err) {
+      setRefreshState("error")
+      setRefreshMessage(err instanceof Error ? err.message : "Network error")
+      resetTimer.current = setTimeout(() => setRefreshState("idle"), 5000)
+    }
+  }
   const [isEditingMaxRent, setIsEditingMaxRent] = useState(false)
   const [maxRentInput, setMaxRentInput] = useState("")
 
@@ -352,34 +437,28 @@ export function FilterPanel({
               <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-300 mb-3">
                 Legend
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2">
                 {[
                   { color: "bg-[#6BBF91]", label: "Walkable" },
                   { color: "bg-lime-500", label: "Grocery only" },
                   { color: "bg-violet-500", label: "Transit only" },
                   { color: "bg-slate-500", label: "Neither" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 min-w-0 rounded-md bg-secondary/40 px-2 py-1.5">
-                    <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", item.color)} />
-                    <span className="text-xs text-muted-foreground dark:text-zinc-300 truncate">{item.label}</span>
+                  <div key={item.label} className="flex items-center gap-2">
+                    <div className={cn("w-2 h-2 rounded-full shrink-0", item.color)} />
+                    <span className="text-xs text-muted-foreground dark:text-zinc-300">{item.label}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 rounded-md bg-secondary/30 px-2 py-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-[#6BBF91]/15 shrink-0">
-                    <img
-                      src="/images/house-walkable.png"
-                      alt=""
-                      width={12}
-                      height={12}
-                      className="block h-3 w-3 object-contain"
-                    />
-                  </span>
-                  <span className="text-xs leading-none text-muted-foreground dark:text-zinc-300">
-                    Rental listings (colored by walkability)
-                  </span>
-                </div>
+              <div className="mt-2.5 flex items-center gap-2">
+                <img
+                  src="/images/house-walkable.png"
+                  alt=""
+                  width={14}
+                  height={14}
+                  className="block h-3.5 w-3.5 object-contain shrink-0 opacity-70"
+                />
+                <span className="text-xs text-muted-foreground dark:text-zinc-300">Rental listings (colored by walkability)</span>
               </div>
             </div>
 
@@ -389,10 +468,10 @@ export function FilterPanel({
                 Layers
               </div>
               <div className="space-y-0.5">
-                <label className="flex items-center justify-between py-1.5 cursor-pointer group">
+                <label className="flex items-center justify-between py-1.5">
                   <div className="flex items-center gap-2">
                     <img src="/images/grocery-icon.png" alt="" width={18} height={18} className="shrink-0" />
-                    <span className="text-sm text-muted-foreground dark:text-zinc-300 group-hover:text-foreground transition-colors">Grocery stores</span>
+                    <span className="text-sm text-muted-foreground dark:text-zinc-300">Grocery stores</span>
                   </div>
                   <PedestrianToggle
                     checked={layers.groceries}
@@ -402,10 +481,10 @@ export function FilterPanel({
                     ariaLabel="Toggle grocery stores layer"
                   />
                 </label>
-                <label className="flex items-center justify-between py-1.5 cursor-pointer group">
+                <label className="flex items-center justify-between py-1.5">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#0ea5e9" }} />
-                    <span className="text-sm text-muted-foreground dark:text-zinc-300 group-hover:text-foreground transition-colors">Transit stops</span>
+                    <span className="text-sm text-muted-foreground dark:text-zinc-300">Transit stops</span>
                   </div>
                   <PedestrianToggle
                     checked={layers.transit}
@@ -415,9 +494,9 @@ export function FilterPanel({
                     ariaLabel="Toggle transit stops layer"
                   />
                 </label>
-                <label className="flex items-center justify-between py-1.5 cursor-pointer group">
+                <label className="flex items-center justify-between py-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground dark:text-zinc-300 group-hover:text-foreground transition-colors">Walk zones</span>
+                    <span className="text-sm text-muted-foreground dark:text-zinc-300">Walk zones</span>
                   </div>
                   <PedestrianToggle
                     checked={layers.smoke}
@@ -432,9 +511,9 @@ export function FilterPanel({
                     Listing sources
                   </div>
                 </div>
-                <label className="flex items-center justify-between py-1.5 cursor-pointer group">
+                <label className="flex items-center justify-between py-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground dark:text-zinc-300 group-hover:text-foreground transition-colors">Static listings</span>
+                    <span className="text-sm text-muted-foreground dark:text-zinc-300">Static listings</span>
                   </div>
                   <PedestrianToggle
                     checked={layers.staticListings}
@@ -445,9 +524,9 @@ export function FilterPanel({
                   />
                 </label>
                 <div>
-                  <label className="flex items-center justify-between py-1.5 cursor-pointer group">
+                  <label className="flex items-center justify-between py-1.5">
                     <div className="flex min-w-0 items-center gap-1">
-                      <span className="text-sm text-muted-foreground dark:text-zinc-300 group-hover:text-foreground transition-colors">
+                      <span className="text-sm text-muted-foreground dark:text-zinc-300">
                         Kijiji/live listings
                       </span>
                       <button
@@ -458,8 +537,7 @@ export function FilterPanel({
                           setKijijiListOpen((open) => !open)
                         }}
                         className={cn(
-                          "flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors",
-                          "hover:bg-secondary hover:text-foreground",
+                          "shrink-0 cursor-pointer text-muted-foreground transition-colors hover:text-foreground",
                           kijijiListOpen && "text-foreground",
                         )}
                         aria-expanded={kijijiListOpen}
@@ -473,6 +551,110 @@ export function FilterPanel({
                           <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                         )}
                       </button>
+
+                      {/* Refresh button group */}
+                      <div
+                        className="relative flex items-center"
+                        ref={modeMenuRef}
+                      >
+                        {/* Main refresh icon */}
+                        <button
+                          type="button"
+                          title={
+                            refreshState === "done"
+                              ? refreshMessage
+                              : refreshState === "error"
+                              ? refreshMessage
+                              : refreshState === "loading"
+                              ? refreshStep
+                              : refreshMode === "scrape"
+                              ? "Prune + scrape new listings"
+                              : "Prune dead listings"
+                          }
+                          disabled={refreshState === "loading"}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            triggerRefresh(refreshMode)
+                          }}
+                          className={cn(
+                            "relative flex size-6 shrink-0 items-center justify-center rounded-md transition-colors disabled:pointer-events-none",
+                            refreshState === "idle" && "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                            refreshState === "loading" && "text-[#6BBF91]",
+                            refreshState === "done" && "text-[#6BBF91]",
+                            refreshState === "error" && "text-red-500",
+                          )}
+                          aria-label="Refresh Kijiji listings"
+                        >
+                          {/* Progress ring */}
+                          {refreshState === "loading" && (
+                            <svg
+                              className="absolute inset-0 w-full h-full -rotate-90"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle
+                                cx="12" cy="12" r="10"
+                                stroke="currentColor"
+                                strokeOpacity="0.15"
+                                strokeWidth="2"
+                              />
+                              <circle
+                                cx="12" cy="12" r="10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeDasharray="62.83"
+                                strokeDashoffset="47"
+                                className="animate-spin"
+                                style={{ animationDuration: "1.4s" }}
+                              />
+                            </svg>
+                          )}
+                          {refreshState === "idle" && <RefreshCw className="h-3 w-3" />}
+                          {refreshState === "loading" && <RefreshCw className="h-3 w-3 animate-spin" style={{ animationDuration: "1.4s" }} />}
+                          {refreshState === "done" && <Check className="h-3 w-3" />}
+                          {refreshState === "error" && <X className="h-3 w-3" />}
+                        </button>
+
+                        {/* Mode picker chevron */}
+                        {refreshState === "idle" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setModeMenuOpen((o) => !o)
+                            }}
+                            className="flex h-4 w-3.5 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="Choose refresh mode"
+                          >
+                            <ChevronDown className="h-2.5 w-2.5" />
+                          </button>
+                        )}
+
+                        {/* Dropdown */}
+                        {modeMenuOpen && (
+                          <div className="absolute left-0 top-full mt-1 z-50 w-44 rounded-lg border border-border bg-card shadow-xl py-1">
+                            {(["prune", "scrape"] as const).map((m) => (
+                              <button
+                                key={m}
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  triggerRefresh(m)
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left text-foreground transition-colors hover:bg-secondary"
+                              >
+                                <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", refreshMode === m ? "bg-[#6BBF91]" : "bg-transparent")} />
+                                {m === "prune" ? "Prune dead listings" : "Prune + scrape new"}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                      </div>
                     </div>
                     <PedestrianToggle
                       checked={layers.kijijiListings}
@@ -482,6 +664,31 @@ export function FilterPanel({
                       ariaLabel="Toggle Kijiji listings source"
                     />
                   </label>
+                  {/* Inline progress bar while refreshing */}
+                  {refreshState === "loading" && (
+                    <div className="mt-1 mb-1.5">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[11px] text-muted-foreground truncate">{refreshStep}</span>
+                        <span className="text-[11px] font-medium text-foreground tabular-nums shrink-0 ml-2">{refreshProgress}%</span>
+                      </div>
+                      <div className="h-1 w-full rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[#6BBF91] transition-all duration-500 ease-out"
+                          style={{ width: `${refreshProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(refreshState === "done" || refreshState === "error") && refreshMessage && (
+                    <p className={cn(
+                      "text-[11px] mt-1 mb-0.5",
+                      refreshState === "done" ? "text-[#6BBF91]" : "text-red-400"
+                    )}>
+                      {refreshMessage}
+                    </p>
+                  )}
+
                   {kijijiListOpen ? (
                     <div className="ml-7">
                       <KijijiListPanel

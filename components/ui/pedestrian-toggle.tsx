@@ -65,7 +65,7 @@ function PedestrianToggle({
       aria-label={ariaLabel ?? 'Toggle'}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'relative inline-flex h-7 w-12 items-center justify-center rounded-full border transition-all duration-300 ease-out',
+        'relative inline-flex h-7 w-12 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ease-out',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         checked
           ? 'border-[#6BBF91]/60 bg-[#6BBF91]/15 shadow-[0_0_14px_rgba(107,191,145,0.35)]'
