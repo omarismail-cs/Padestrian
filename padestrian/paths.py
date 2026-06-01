@@ -1,8 +1,6 @@
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-WEB_DIR = PROJECT_ROOT / "web"
-MAPBOX_CONFIG_JS = WEB_DIR / "config.js"
 DATA_DIR = PROJECT_ROOT / "data"
 GTFS_DIR = DATA_DIR / "GTFSExport"
 

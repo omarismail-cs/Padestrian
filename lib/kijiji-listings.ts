@@ -20,7 +20,7 @@ export interface KijijiListItem {
   hiddenReason: "layer" | "filters" | null
 }
 
-export function isKijijiListing(source: unknown, id?: unknown): boolean {
+function isKijijiListing(source: unknown, id?: unknown): boolean {
   if (String(source ?? "").toLowerCase() === "kijiji") return true
   const sid = String(id ?? "")
   return sid.startsWith("kijiji-")

@@ -2,11 +2,11 @@ import type { Feature, Point } from "geojson"
 import type { GeocodeResult } from "@/lib/geocode"
 import type { PointScore } from "@/lib/score-point"
 
-export const CUSTOM_LISTING_ID = "custom-address"
-export const CUSTOM_ADDRESS_STORAGE_KEY = "padestrian:custom-address"
-export const CUSTOM_ADDRESS_STORAGE_VERSION = 1
+const CUSTOM_LISTING_ID = "custom-address"
+const CUSTOM_ADDRESS_STORAGE_KEY = "padestrian:custom-address"
+const CUSTOM_ADDRESS_STORAGE_VERSION = 1
 
-export interface StoredCustomAddress {
+interface StoredCustomAddress {
   version: number
   id: string
   address: string
@@ -46,7 +46,7 @@ export function buildCustomListingFeature(
   }
 }
 
-export function storedToFeature(stored: StoredCustomAddress): Feature<Point> {
+function storedToFeature(stored: StoredCustomAddress): Feature<Point> {
   return {
     type: "Feature",
     id: stored.id,
@@ -69,7 +69,7 @@ export function storedToFeature(stored: StoredCustomAddress): Feature<Point> {
   }
 }
 
-export function featureToStored(feature: Feature<Point>): StoredCustomAddress | null {
+function featureToStored(feature: Feature<Point>): StoredCustomAddress | null {
   const coords = feature.geometry?.coordinates
   if (!coords || coords.length < 2) return null
   const p = feature.properties ?? {}

@@ -191,9 +191,3 @@ export async function scorePoint(
   }
 }
 
-/** Clear cached zone data (e.g. after hot reload in dev). */
-export function clearScorePointCache(): void {
-  groceryPolysCache = null
-  transitPolysCache = null
-  stopsCache = null
-}

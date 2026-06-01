@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -24,26 +23,7 @@
   --border: oklch(0.88 0.005 90);
   --input: oklch(0.94 0.005 90);
   --ring: oklch(0.76 0.09 154);
-  --chart-1: oklch(0.76 0.09 154);
-  --chart-2: oklch(0.6 0.2 260);
-  --chart-3: oklch(0.5 0 0);
-  --chart-4: oklch(0.55 0.22 27);
-  --chart-5: oklch(0.45 0 0);
   --radius: 0.75rem;
-  --sidebar: oklch(0.96 0.005 90);
-  --sidebar-foreground: oklch(0.15 0 0);
-  --sidebar-primary: oklch(0.76 0.09 154);
-  --sidebar-primary-foreground: oklch(0.15 0 0);
-  --sidebar-accent: oklch(0.94 0.005 90);
-  --sidebar-accent-foreground: oklch(0.15 0 0);
-  --sidebar-border: oklch(0.88 0.005 90);
-  --sidebar-ring: oklch(0.76 0.09 154);
-  
-  /* Map specific tokens - green based to match logo */
-  --eligible: oklch(0.76 0.09 154);
-  --grocery: oklch(0.65 0.15 85);
-  --transit: oklch(0.6 0.2 260);
-  --neither: oklch(0.5 0 0);
 }
 
 /* Padestrian Dark Theme - applies when html has .dark class */
@@ -68,30 +48,10 @@
   --border: oklch(0.22 0 0);
   --input: oklch(0.18 0 0);
   --ring: oklch(0.76 0.09 154);
-  --chart-1: oklch(0.76 0.09 154);
-  --chart-2: oklch(0.6 0.2 260);
-  --chart-3: oklch(0.5 0 0);
-  --chart-4: oklch(0.55 0.22 27);
-  --chart-5: oklch(0.45 0 0);
-  --sidebar: #0F110F;
-  --sidebar-foreground: oklch(0.95 0 0);
-  --sidebar-primary: oklch(0.76 0.09 154);
-  --sidebar-primary-foreground: oklch(0.09 0 0);
-  --sidebar-accent: oklch(0.18 0 0);
-  --sidebar-accent-foreground: oklch(0.95 0 0);
-  --sidebar-border: oklch(0.22 0 0);
-  --sidebar-ring: oklch(0.76 0.09 154);
-  
-  /* Map specific tokens */
-  --eligible: oklch(0.76 0.09 154);
-  --grocery: oklch(0.65 0.15 85);
-  --transit: oklch(0.6 0.2 260);
-  --neither: oklch(0.5 0 0);
 }
 
 @theme inline {
   --font-sans: 'Satoshi', var(--font-geist), 'Geist', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -111,23 +71,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer base {

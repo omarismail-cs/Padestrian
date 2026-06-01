@@ -27,7 +27,6 @@ const MAP_STYLE = {
 } as const
 
 // Map layer colours — distinct from listing house icons
-const LAYER_GROCERY_COLOR = "#14b8a6"  // teal  — grocery store pins
 const LAYER_TRANSIT_COLOR = "#0ea5e9"  // sky   — transit stop pins
 const LAYER_SMOKE_TRANSIT = "#8b5cf6"  // violet — transit walk zone fill
 const LAYER_SMOKE_GROCERY = "#84cc16"  // lime   — grocery walk zone fill

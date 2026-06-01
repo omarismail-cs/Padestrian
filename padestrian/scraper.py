@@ -216,45 +216,6 @@ def normalize_listing(raw: dict[str, Any]) -> dict[str, Any] | None:
     return listing
 
 
-def scrape_and_normalize(max_pages: int, max_listings: int = 60) -> list[dict[str, Any]]:
-    """
-    End-to-end scrape flow with one reused browser context.
-
-    Steps:
-    1) collect candidate URLs
-    2) scrape each listing detail with one shared Playwright page
-    3) normalize to listings.json schema
-    4) stop when `max_listings` valid normalized listings are gathered
-    """
-    if max_pages < 1 or max_listings < 1:
-        return []
-
-    candidates = scrape_kijiji_urls(max_pages)
-    normalized: list[dict[str, Any]] = []
-
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
-        try:
-            for idx, url in enumerate(candidates):
-                raw = scrape_listing_detail(page, url)
-                listing = normalize_listing(raw)
-                if listing is not None:
-                    normalized.append(listing)
-                    if len(normalized) >= max_listings:
-                        break
-
-                # Small jitter to reduce load and bot-like cadence.
-                if idx < len(candidates) - 1:
-                    time.sleep(random.uniform(1.0, 2.5))
-        finally:
-            context.close()
-            browser.close()
-
-    return normalized
-
-
 def _clean_text(value: Any) -> str | None:
     if value is None:
         return None

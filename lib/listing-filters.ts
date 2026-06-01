@@ -11,7 +11,7 @@ export interface ListingLayerState {
   kijijiListings: boolean
 }
 
-export function passesSourceToggles(
+function passesSourceToggles(
   source: unknown,
   layers: ListingLayerState,
 ): boolean {
@@ -20,7 +20,7 @@ export function passesSourceToggles(
   return (layers.kijijiListings && isKijiji) || (layers.staticListings && !isKijiji)
 }
 
-export function passesRentAndBedFilters(
+function passesRentAndBedFilters(
   properties: Record<string, unknown>,
   filters: ListingFilterState,
 ): boolean {
