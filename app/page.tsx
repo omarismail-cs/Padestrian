@@ -52,6 +52,7 @@ export default function Page() {
   })
 
   const [listingsData, setListingsData] = useState<FeatureCollection | null>(null)
+  const [listingsUpdatedAt, setListingsUpdatedAt] = useState<string | null>(null)
   const [customListing, setCustomListing] = useState<Feature<Point> | null>(null)
   const [isCheckingAddress, setIsCheckingAddress] = useState(false)
   const [addressError, setAddressError] = useState<string | null>(null)
@@ -83,6 +84,8 @@ export default function Page() {
 
   const handleListingsChange = useCallback((fc: FeatureCollection) => {
     setListingsData(fc)
+    const ts = (fc as FeatureCollection & { generated_at?: string }).generated_at
+    if (ts) setListingsUpdatedAt(ts)
   }, [])
 
   const applyGeocodedAddress = useCallback(async (geocoded: GeocodeResult) => {
@@ -132,6 +135,13 @@ export default function Page() {
     setAddressError(null)
   }, [])
 
+  const handleLocateMe = useCallback(
+    async (lon: number, lat: number) => {
+      await applyGeocodedAddress({ label: "Your location", lon, lat })
+    },
+    [applyGeocodedAddress],
+  )
+
   const handleFocusKijijiListing = useCallback(
     (item: KijijiListItem) => {
       if (!layers.kijijiListings) {
@@ -160,6 +170,7 @@ export default function Page() {
         onListingsChange={handleListingsChange}
         focusListing={focusListing}
         focusListingKey={focusListingKey}
+        onLocateMe={handleLocateMe}
       />
       <FilterPanel
         filters={filters}
@@ -176,6 +187,7 @@ export default function Page() {
         onSelectAddress={handleSelectAddress}
         onClearCustomAddress={handleClearCustomAddress}
         listingsData={listingsData}
+        listingsUpdatedAt={listingsUpdatedAt ?? undefined}
         onFocusKijijiListing={handleFocusKijijiListing}
         selectedKijijiId={selectedKijijiId}
       />

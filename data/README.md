@@ -96,7 +96,7 @@ Scraped with `python -m padestrian scrape-listings`; snapshot in `listings.kijij
 - **New scrapes:** `normalize_listing` parses baths from attribute text, title, description, and URL slug.
 - **Existing JSON** (title + URL only): `python -m padestrian backfill-bathrooms --fetch` reads each ad’s `vip-attributes-section` over HTTP (e.g. `1 Bathrooms`), then `validate-listings` and `filter-listings`.
 
-**In-app refresh (local dev only):** The sidebar has a refresh button next to "Kijiji/live listings" with two modes -- *Prune* (remove dead ads + rescore) and *Prune + scrape* (also fetch new ads). Calls `/api/refresh-kijiji` which streams step-by-step progress while chaining the Python CLI commands. Not available on Vercel.
+**In-app refresh:** The sidebar has a refresh button next to "Kijiji/live listings" with two modes — *Prune* (remove dead ads + rescore) and *Prune + scrape* (also fetch new ads). Calls `/api/refresh-kijiji` which streams step-by-step progress while chaining the Python CLI commands. Requires a local Python environment.
 
 ## Walk zones (`data/zones/`)
 
@@ -111,7 +111,7 @@ Transit is **off by default** (~5.8k stops). Use `--transit --transit-limit 50` 
 
 ## Web app: “Check an address”
 
-The Next.js map can score **any Ottawa address** in the browser (no Python on Vercel). It uses the same rules as `filter-listings`:
+The Next.js map can score **any Ottawa address** in the browser. It uses the same rules as `filter-listings`:
 
 | Need | File |
 |------|------|
@@ -119,4 +119,4 @@ The Next.js map can score **any Ottawa address** in the browser (no Python on Ve
 | Transit walk | `zones/transit-10min.geojson` optional; `stops.geojson` always used for nearest-stop fallback |
 | Rental pins on map | `listings-scored.geojson` |
 
-Run `build-zones` and `filter-listings` locally, then serve files under `/data/` (see root README **Deploying to Vercel**). Custom addresses are **not** written to `listings.json`; they live in the user’s `localStorage` only.
+Run `build-zones` and `filter-listings` locally, then serve the files under `/data/`. Custom addresses are **not** written to `listings.json`; they live in the user’s `localStorage` only.

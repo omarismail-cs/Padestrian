@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useCallback, useState, useEffect } from "react"
-import Map, { NavigationControl, Popup, Source, Layer, type MapRef } from "react-map-gl/mapbox"
+import Map, { NavigationControl, GeolocateControl, Popup, Source, Layer, type MapRef } from "react-map-gl/mapbox"
 import type { MapLayerMouseEvent } from "react-map-gl/mapbox"
 import type { GeoJSON } from "geojson"
 import "mapbox-gl/dist/mapbox-gl.css"
@@ -78,6 +78,7 @@ interface MapViewProps {
   onListingsChange?: (fc: GeoJSON.FeatureCollection) => void
   focusListing: MapFocusListing | null
   focusListingKey: number
+  onLocateMe?: (lon: number, lat: number) => void
 }
 
 /** Same as grocery POI popups — scalar offset works with Mapbox anchor-bottom */
@@ -93,6 +94,7 @@ export function MapView({
   onListingsChange,
   focusListing,
   focusListingKey,
+  onLocateMe,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null)
   const [popupInfo, setPopupInfo]   = useState<PopupInfo | null>(null)
@@ -427,6 +429,14 @@ export function MapView({
       onMouseLeave={handleMouseLeave}
     >
       <NavigationControl position="bottom-right" />
+      {onLocateMe && (
+        <GeolocateControl
+          position="bottom-right"
+          trackUserLocation={false}
+          showAccuracyCircle={false}
+          onGeolocate={(e) => onLocateMe(e.coords.longitude, e.coords.latitude)}
+        />
+      )}
 
       {/* ── Listings (pre-colored house icons, same pattern as groceries) ── */}
       {listings && houseIconReady && (

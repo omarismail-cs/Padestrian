@@ -11,6 +11,14 @@ import type { GeocodeResult } from "@/lib/geocode"
 import { buildKijijiListItems, type KijijiListItem } from "@/lib/kijiji-listings"
 import { cn } from "@/lib/utils"
 
+function formatRelative(iso: string): string {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (diff < 60) return "just now"
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`
+  return `${Math.floor(diff / 86400)} days ago`
+}
+
 interface Filters {
   walkableOnly: boolean
   maxRent: number
@@ -40,6 +48,7 @@ interface FilterPanelProps {
   onSelectAddress: (result: GeocodeResult) => void
   onClearCustomAddress: () => void
   listingsData: FeatureCollection | null
+  listingsUpdatedAt?: string
   onFocusKijijiListing: (item: KijijiListItem) => void
   selectedKijijiId: string | null
 }
@@ -67,6 +76,7 @@ export function FilterPanel({
   onSelectAddress,
   onClearCustomAddress,
   listingsData,
+  listingsUpdatedAt,
   onFocusKijijiListing,
   selectedKijijiId,
 }: FilterPanelProps) {
@@ -311,7 +321,14 @@ export function FilterPanel({
           style={section(80)}
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground dark:text-zinc-300">Showing</span>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm text-muted-foreground dark:text-zinc-300">Showing</span>
+              {listingsUpdatedAt && (
+                <span className="text-[10px] text-muted-foreground/60">
+                  Updated {formatRelative(listingsUpdatedAt)}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-foreground">{stats.total} listings</span>
               <span className="text-muted-foreground">·</span>

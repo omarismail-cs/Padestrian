@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -191,6 +192,7 @@ def score_listings(
         scored_features,
         metadata={
             "generator": "padestrian filter-listings",
+            "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "walk_minutes": minutes,
             "grocery_zone_source": grocery_src,
             "transit_zone_source": transit_src,
