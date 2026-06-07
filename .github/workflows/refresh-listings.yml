@@ -5,6 +5,9 @@ on:
     - cron: '0 13 */5 * *'  # every 5 days at 9 AM Ottawa time (UTC-4)
   workflow_dispatch:         # run manually from GitHub Actions tab anytime
 
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -22,24 +25,35 @@ jobs:
       - name: Install Playwright browser
         run: python -m playwright install chromium --with-deps
 
+      - name: Restore walk zones for scoring
+        run: |
+          mkdir -p data/zones data/isochrones public/data/zones
+          cp public/data/zones/grocery-10min.geojson data/zones/
+          cp public/data/zones/transit-10min.geojson data/zones/
+          if [ -f public/data/isochrones/smoke.geojson ]; then
+            cp public/data/isochrones/smoke.geojson data/isochrones/
+          fi
+
       - name: Run pipeline
         env:
           ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
           MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
         run: |
+          python -m padestrian scrape-listings --append
           python -m padestrian prune-kijiji
-          python -m padestrian scrape-listings
           python -m padestrian backfill-bathrooms --fetch
+          python -m padestrian validate-listings
           python -m padestrian filter-listings
 
       - name: Copy outputs to public/data
         run: |
-          cp data/listings-scored.geojson        public/data/
-          cp data/listings.json                  public/data/
-          cp data/listings.kijiji.json           public/data/
-          cp data/listings.geojson               public/data/
-          cp data/zones/grocery-10min.geojson    public/data/zones/
-          cp data/zones/transit-10min.geojson    public/data/zones/
+          mkdir -p public/data/zones
+          cp data/listings-scored.geojson public/data/
+          cp data/listings.json public/data/
+          cp data/listings.kijiji.json public/data/
+          cp data/listings.geojson public/data/
+          cp data/zones/grocery-10min.geojson public/data/zones/
+          cp data/zones/transit-10min.geojson public/data/zones/
 
       - name: Commit and push
         run: |
