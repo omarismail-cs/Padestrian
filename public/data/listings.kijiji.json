@@ -1,7 +1,7 @@
 {
   "city": "Ottawa, ON",
   "source": "kijiji scrape",
-  "generated_at": "2026-05-31T02:12:12Z",
+  "generated_at": "2026-06-09T19:33:50Z",
   "listings": [
     {
       "id": "kijiji-1734238961",
@@ -829,6 +829,114 @@
       "bedrooms": 0,
       "source": "kijiji",
       "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/recital-i-iii:-studio-apartment-available-near-uottawa-campus/1735716004",
+      "bathrooms": 1.0
+    },
+    {
+      "id": "kijiji-1644357113",
+      "title": "New Modern 1 Bedroom Apartments in Centertown",
+      "address": "70 Gloucester Street, Ottawa, Ontario K2P 1N6, Canada",
+      "lat": 45.419125,
+      "lon": -75.694893,
+      "rent_cad": 1980,
+      "bedrooms": 1,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/new-modern-1-bedroom-apartments-in-centertown/1644357113",
+      "bathrooms": 1.0
+    },
+    {
+      "id": "kijiji-1738931239",
+      "title": "All-inclusive 2Bed/1Bath Apartment Close to Carleton U-$2100",
+      "address": "105 Champagne Avenue South, Ottawa, Ontario K1S 5E5, Canada",
+      "lat": 45.398877,
+      "lon": -75.711446,
+      "rent_cad": 2100,
+      "bedrooms": 2,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/all-inclusive-2bed-1bath-apartment-close-to-carleton-u-2100/1738931239",
+      "bathrooms": 1.0
+    },
+    {
+      "id": "kijiji-1738675392",
+      "title": "3 BEDROOM FOR August 1st 2026 - STARTING @ $1999.00",
+      "address": "180 Lees Avenue, Ottawa, Ontario K1S 5G5, Canada",
+      "lat": 45.415137,
+      "lon": -75.67118,
+      "rent_cad": 1999,
+      "bedrooms": 3,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/3-bedroom-for-august-1st-2026-starting-1999-00/1738675392",
+      "bathrooms": 1.5
+    },
+    {
+      "id": "kijiji-1738931241",
+      "title": "All-inclusive 2Bed/2Bath Apartment Close to Carleton U-$2300",
+      "address": "105 Champagne Avenue South, Ottawa, Ontario K1S 5E5, Canada",
+      "lat": 45.398877,
+      "lon": -75.711446,
+      "rent_cad": 2300,
+      "bedrooms": 2,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/all-inclusive-2bed-2bath-apartment-close-to-carleton-u-2300/1738931241",
+      "bathrooms": 2.0
+    },
+    {
+      "id": "kijiji-1738217488",
+      "title": "2 BED - 2 BATH - OTTAWA - APARTMENT BUILDING",
+      "address": "100 Roger Guindon Avenue, Ottawa, Ontario K1G 3Z7, Canada",
+      "lat": 45.403298,
+      "lon": -75.643288,
+      "rent_cad": 2400,
+      "bedrooms": 2,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/2-bed-2-bath-ottawa-apartment-building/1738217488",
+      "bathrooms": 2.0
+    },
+    {
+      "id": "kijiji-1731159401",
+      "title": "1 Bedroom Available! Move In Now & Receive 2 Month's Rent Free!",
+      "address": "100 Frontier Path Private, Gloucester, Ontario K1J 0C5, Canada",
+      "lat": 45.43025,
+      "lon": -75.61094,
+      "rent_cad": 2050,
+      "bedrooms": 1,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/1-bedroom-available-move-in-now-receive-2-months-rent-free/1731159401",
+      "bathrooms": 1.0
+    },
+    {
+      "id": "kijiji-1738931237",
+      "title": "All-inclusive 1Bed/1Bath Apartment Close to Carleton U - $1800",
+      "address": "105 Champagne Avenue South, Ottawa, Ontario K1S 5E5, Canada",
+      "lat": 45.398877,
+      "lon": -75.711446,
+      "rent_cad": 1800,
+      "bedrooms": 1,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/all-inclusive-1bed-1bath-apartment-close-to-carleton-u-1800/1738931237",
+      "bathrooms": 1.0
+    },
+    {
+      "id": "kijiji-1738931236",
+      "title": "All-inclusive Student Studio Apartment Close to Carleton U-$1700",
+      "address": "105 Champagne Avenue South, Ottawa, Ontario K1S 5E5, Canada",
+      "lat": 45.398877,
+      "lon": -75.711446,
+      "rent_cad": 1700,
+      "bedrooms": 0,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/all-inclusive-student-studio-apartment-close-to-carleton-u-1700/1738931236",
+      "bathrooms": 1.0
+    },
+    {
+      "id": "kijiji-1738931497",
+      "title": "Centrepointe Union - The - T03 Apartment for Rent",
+      "address": "19 Centrepointe Drive, Nepean, Ontario K2G 6C4, Canada",
+      "lat": 45.347739,
+      "lon": -75.767585,
+      "rent_cad": 1940,
+      "bedrooms": 0,
+      "source": "kijiji",
+      "url": "https://www.kijiji.ca/v-apartments-condos/ottawa/centrepointe-union-the-t03-apartment-for-rent/1738931497",
       "bathrooms": 1.0
     }
   ]
