@@ -728,7 +728,7 @@ export function FilterPanel({
               Find your car-free apartment
             </p>
             <a
-              href="https://github.com/omarismall-cs/Padestrian"
+              href="https://github.com/omarismail-cs/Padestrian"
               target="_blank"
               rel="noopener noreferrer"
               className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
