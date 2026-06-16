@@ -19,6 +19,30 @@ function formatRelative(iso: string): string {
   return `${Math.floor(diff / 86400)} days ago`
 }
 
+const LAYER_ICON_SLOT = "flex w-6 shrink-0 items-center justify-center"
+
+function WalkZonesIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden>
+      <path
+        d="M10 2.5 16.5 7.25 14 16.5 6 16.5 3.5 7.25Z"
+        fill="none"
+        stroke="#84cc16"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 6 13.5 9 12 14 8 14 6.5 9Z"
+        fill="none"
+        stroke="#8b5cf6"
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+        opacity="0.9"
+      />
+    </svg>
+  )
+}
+
 interface Filters {
   walkableOnly: boolean
   maxRent: number
@@ -454,28 +478,27 @@ export function FilterPanel({
               <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-300 mb-3">
                 Legend
               </div>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
                 {[
-                  { color: "bg-[#6BBF91]", label: "Walkable" },
-                  { color: "bg-lime-500", label: "Grocery only" },
-                  { color: "bg-violet-500", label: "Transit only" },
-                  { color: "bg-slate-500", label: "Neither" },
+                  { src: "/images/house-walkable.png", label: "Walkable" },
+                  { src: "/images/house-grocery.png", label: "Grocery only" },
+                  { src: "/images/house-transit.png", label: "Transit only" },
+                  { src: "/images/house-neither.png", label: "Neither" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2">
-                    <div className={cn("w-2 h-2 rounded-full shrink-0", item.color)} />
-                    <span className="text-xs text-muted-foreground dark:text-zinc-300">{item.label}</span>
+                  <div key={item.label} className="flex items-center gap-2 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.src}
+                      alt=""
+                      width={14}
+                      height={14}
+                      className="h-3.5 w-3.5 shrink-0 object-contain"
+                    />
+                    <span className="text-xs text-muted-foreground dark:text-zinc-300 truncate">
+                      {item.label}
+                    </span>
                   </div>
                 ))}
-              </div>
-              <div className="mt-2.5 flex items-center gap-2">
-                <img
-                  src="/images/house-walkable.png"
-                  alt=""
-                  width={14}
-                  height={14}
-                  className="block h-3.5 w-3.5 object-contain shrink-0 opacity-70"
-                />
-                <span className="text-xs text-muted-foreground dark:text-zinc-300">Rental listings (colored by walkability)</span>
               </div>
             </div>
 
@@ -486,8 +509,17 @@ export function FilterPanel({
               </div>
               <div className="space-y-0.5">
                 <label className="flex items-center justify-between py-1.5">
-                  <div className="flex items-center gap-2">
-                    <img src="/images/grocery-icon.png" alt="" width={18} height={18} className="shrink-0" />
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={LAYER_ICON_SLOT}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/images/grocery-icon.png"
+                        alt=""
+                        width={18}
+                        height={18}
+                        className="h-[18px] w-[18px] object-contain"
+                      />
+                    </div>
                     <span className="text-sm text-muted-foreground dark:text-zinc-300">Grocery stores</span>
                   </div>
                   <PedestrianToggle
@@ -499,8 +531,13 @@ export function FilterPanel({
                   />
                 </label>
                 <label className="flex items-center justify-between py-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#0ea5e9" }} />
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={LAYER_ICON_SLOT}>
+                      <div
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ background: "#0ea5e9" }}
+                      />
+                    </div>
                     <span className="text-sm text-muted-foreground dark:text-zinc-300">Transit stops</span>
                   </div>
                   <PedestrianToggle
@@ -512,7 +549,10 @@ export function FilterPanel({
                   />
                 </label>
                 <label className="flex items-center justify-between py-1.5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={LAYER_ICON_SLOT}>
+                      <WalkZonesIcon />
+                    </div>
                     <span className="text-sm text-muted-foreground dark:text-zinc-300">Walk zones</span>
                   </div>
                   <PedestrianToggle
