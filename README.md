@@ -25,15 +25,12 @@
   <tr>
     <td width="33%" align="center" valign="top">
       <img src="public/images/screenshot-sidebar-walktime.png" alt="Walk time slider and address check" width="100%" />
-      <br /><sub>Walk time · address check</sub>
     </td>
     <td width="33%" align="center" valign="top">
       <img src="public/images/screenshot-sidebar-rent.png" alt="Max rent histogram and bedroom filters" width="100%" />
-      <br /><sub>Rent · bedrooms</sub>
     </td>
     <td width="34%" align="center" valign="top">
       <img src="public/images/screenshot-sidebar-layers.png" alt="Legend, map layers, and listing sources" width="100%" />
-      <br /><sub>Legend · layers · sources</sub>
     </td>
   </tr>
 </table>
@@ -55,13 +52,13 @@ Padestrian puts that in one place: hover a pin, see rent and address, know at a 
 ## Features
 
 - **Interactive Mapbox map** with dark/light theme, rent and bedroom filters, **walk-time slider (10 / 15 / 20 min)**, and a “walkable only” toggle  
-- **Live Kijiji listings** (~270+ ads) scored against walk zones; optional demo/static set from City of Ottawa address points  
+- **Live Kijiji listings** (count varies; GitHub Actions scrapes and prunes every 4 days) plus an optional **180-listing demo set** from City of Ottawa address points  
 - **Color-coded house markers**: walkable, grocery-only, transit-only, or neither (updates when you change walk time)  
 - **Grocery + transit + walk-zone layers** you can turn on and off  
 - **Listing cards** on hover (price, beds/baths, address, Kijiji link when available)  
 - **Check an address** or **Locate me** on the map: Ottawa autocomplete or GPS, then the same color-coded pin and walkability badge as rentals (saved in your browser until you clear it)  
 - **Kijiji list** (chevron beside the layer toggle): browse all live ads, click to pan and open the listing card  
-- **Automated listing refresh** via GitHub Actions (scrape → validate → score → deploy); sidebar shows **last updated** time  
+- **Automated listing refresh** via GitHub Actions every 4 days (scrape → prune dead ads → score → deploy); sidebar **last updated** badge reflects the latest run  
 - **Optional local Kijiji import** via the Python CLI or the in-app refresh button (local dev only)
 
 ---
