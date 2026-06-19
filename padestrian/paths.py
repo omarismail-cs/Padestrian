@@ -16,6 +16,7 @@ LISTINGS_SCORED_PATH = DATA_DIR / "listings-scored.geojson"
 MUNICIPAL_POINTS_PATH = DATA_DIR / "municipal-addresses.geojson"
 ZONES_DIR = DATA_DIR / "zones"
 ZONES_CACHE_DIR = ZONES_DIR / "cache"
+TRANSIT_HUBS_GEOJSON_PATH = DATA_DIR / "transit-hubs.geojson"
 
 
 def minute_tag(minutes: float) -> str:

@@ -12,6 +12,7 @@ from padestrian import __version__
 from padestrian.gtfs_stops import export_stops_geojson
 from padestrian.groceries import export_grocery_points_geojson
 from padestrian.isochrones import run_smoke_isochrone
+from padestrian.transit_hubs import export_transit_hubs_geojson
 from padestrian.zones import run_build_zones
 from padestrian.filter_listings import score_listings
 from padestrian.validate_scoring import print_report, run_validation
@@ -66,7 +67,11 @@ def cmd_build_essentials(_args: argparse.Namespace) -> int:
     print(f"Groceries: {GROCERIES_PATH}")
     grocery_stats = export_grocery_points_geojson()
     _print_stats("Grocery points", grocery_stats)
-    print(f"  -> {GROCERIES_POINTS_PATH}")
+    print(f"  -> {GROCERIES_POINTS_PATH}\n")
+
+    hub_stats = export_transit_hubs_geojson()
+    print(f"Transit hubs: {hub_stats['hub_count']} stops")
+    print(f"  -> {hub_stats['output']}")
 
     return 0
 
@@ -85,6 +90,8 @@ def cmd_build_zones(args: argparse.Namespace) -> int:
             transit=transit,
             grocery_limit=args.grocery_limit,
             transit_limit=args.transit_limit,
+            transit_hubs=not args.transit_all,
+            transit_all=args.transit_all,
             delay_seconds=args.delay,
             force=args.force,
             dry_run=args.dry_run,
@@ -114,6 +121,17 @@ def cmd_build_zones(args: argparse.Namespace) -> int:
         return 1
 
     return 0 if not any(layer.failed for layer in result.layers) else 1
+
+
+def cmd_build_transit_hubs(_args: argparse.Namespace) -> int:
+    """Export curated hub stops from GTFS → transit-hubs.geojson."""
+    if not STOPS_GEOJSON_PATH.is_file():
+        print(f"Missing {STOPS_GEOJSON_PATH}. Run: python -m padestrian build-essentials", file=sys.stderr)
+        return 1
+    stats = export_transit_hubs_geojson()
+    print(f"Wrote {stats['output']} ({stats['hub_count']} hubs)")
+    print("Next: python -m padestrian build-zones --transit --no-groceries --minutes 10")
+    return 0
 
 
 def cmd_smoke_isochrone(args: argparse.Namespace) -> int:
@@ -537,7 +555,12 @@ def main(argv: list[str] | None = None) -> int:
     zones_parser.add_argument(
         "--transit",
         action="store_true",
-        help="Also build transit stop zones (large — use --transit-limit)",
+        help="Build transit hub walk zones (curated stations; run build-transit-hubs first)",
+    )
+    zones_parser.add_argument(
+        "--transit-all",
+        action="store_true",
+        help="Use first N stops from stops.geojson instead of hubs (legacy; pair with --transit-limit)",
     )
     zones_parser.add_argument(
         "--grocery-limit",
@@ -570,6 +593,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Print what would be fetched without calling ORS",
     )
     zones_parser.set_defaults(func=cmd_build_zones)
+
+    hubs_parser = subparsers.add_parser(
+        "build-transit-hubs",
+        help="Export curated OC Transpo hub stops for transit zone building",
+    )
+    hubs_parser.set_defaults(func=cmd_build_transit_hubs)
 
     fetch_osm_parser = subparsers.add_parser(
         "fetch-osm-residential",

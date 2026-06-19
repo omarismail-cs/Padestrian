@@ -1,0 +1,728 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "RE992",
+      "properties": {
+        "stop_id": "RE992",
+        "stop_code": "3039",
+        "stop_name": "AIRPORT O-TRAIN NORTH / AÉROPORT O-TRAIN NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.66877,
+          45.323299
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "818",
+      "properties": {
+        "stop_id": "818",
+        "stop_code": "3017",
+        "stop_name": "BASELINE STN OFF ONLY",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.762225,
+          45.348425
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NA990",
+      "properties": {
+        "stop_id": "NA990",
+        "stop_code": "3060",
+        "stop_name": "BAYVIEW O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.72206,
+          45.409388
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9490",
+      "properties": {
+        "stop_id": "9490",
+        "stop_code": "3034",
+        "stop_name": "BILLINGS BRIDGE 1A (A)",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.676439,
+          45.38485
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "EE990",
+      "properties": {
+        "stop_id": "EE990",
+        "stop_code": "3027",
+        "stop_name": "BLAIR O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.608693,
+          45.430798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RE996",
+      "properties": {
+        "stop_id": "RE996",
+        "stop_code": "3067",
+        "stop_name": "BOWESVILLE O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.632772,
+          45.293434
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CG990",
+      "properties": {
+        "stop_id": "CG990",
+        "stop_code": "3062",
+        "stop_name": "CARLETON O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.695855,
+          45.385505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9608",
+      "properties": {
+        "stop_id": "9608",
+        "stop_code": "4980",
+        "stop_name": "CARLINGWOOD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.76935,
+          45.371275
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NB995",
+      "properties": {
+        "stop_id": "NB995",
+        "stop_code": "3065",
+        "stop_name": "CORSO ITALIA O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.714904,
+          45.404286
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "EC990",
+      "properties": {
+        "stop_id": "EC990",
+        "stop_code": "3026",
+        "stop_name": "CYRVILLE O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.626354,
+          45.422603
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NB990",
+      "properties": {
+        "stop_id": "NB990",
+        "stop_code": "3061",
+        "stop_name": "DOW'S LAKE O-TRAIN /  O-TRAIN LAC DOW",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.709847,
+          45.397556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9531",
+      "properties": {
+        "stop_id": "9531",
+        "stop_code": "3055",
+        "stop_name": "EAGLESON A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.883806,
+          45.318521
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "6607",
+      "properties": {
+        "stop_id": "6607",
+        "stop_code": "3043",
+        "stop_name": "FALLOWFIELD A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.736062,
+          45.298778
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RF990",
+      "properties": {
+        "stop_id": "RF990",
+        "stop_code": "3037",
+        "stop_name": "GREENBORO O-TRAIN",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.659482,
+          45.359698
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9492",
+      "properties": {
+        "stop_id": "9492",
+        "stop_code": "3035",
+        "stop_name": "HERON 1A (A)",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.679749,
+          45.378933
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AF990",
+      "properties": {
+        "stop_id": "AF990",
+        "stop_code": "3023",
+        "stop_name": "HURDMAN O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.6648,
+          45.412316
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CE990",
+      "properties": {
+        "stop_id": "CE990",
+        "stop_code": "3022",
+        "stop_name": "LEES O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.670478,
+          45.416342
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RE995",
+      "properties": {
+        "stop_id": "RE995",
+        "stop_code": "3041",
+        "stop_name": "LEITRIM O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.631925,
+          45.313671
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RR990",
+      "properties": {
+        "stop_id": "RR990",
+        "stop_code": "3068",
+        "stop_name": "LIMEBANK O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.66639,
+          45.277641
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9487",
+      "properties": {
+        "stop_id": "9487",
+        "stop_code": "3014",
+        "stop_name": "LINCOLN FIELDS 1A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.78344,
+          45.366287
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CA990",
+      "properties": {
+        "stop_id": "CA990",
+        "stop_code": "3051",
+        "stop_name": "LYON O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.704161,
+          45.419098
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "239",
+      "properties": {
+        "stop_id": "239",
+        "stop_code": "3076",
+        "stop_name": "MILLENNIUM A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.448625,
+          45.465695
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RA990",
+      "properties": {
+        "stop_id": "RA990",
+        "stop_code": "3063",
+        "stop_name": "MOONEY'S BAY O-TRAIN",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.684946,
+          45.377066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CB990",
+      "properties": {
+        "stop_id": "CB990",
+        "stop_code": "3052",
+        "stop_name": "PARLIAMENT / PARLEMENT O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.698485,
+          45.421542
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CJ990",
+      "properties": {
+        "stop_id": "CJ990",
+        "stop_code": "3010",
+        "stop_name": "PIMISI O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.713222,
+          45.413693
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9520",
+      "properties": {
+        "stop_id": "9520",
+        "stop_code": "3019",
+        "stop_name": "PINECREST A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.791479,
+          45.350606
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "1556",
+      "properties": {
+        "stop_id": "1556",
+        "stop_code": "3028",
+        "stop_name": "PLACE D'ORLÉANS A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.519323,
+          45.478522
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "18",
+      "properties": {
+        "stop_id": "18",
+        "stop_code": "3015",
+        "stop_name": "QUEENSWAY 1A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.77184,
+          45.359035
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CD990",
+      "properties": {
+        "stop_id": "CD990",
+        "stop_code": "3009",
+        "stop_name": "RIDEAU O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.692039,
+          45.426057
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "103",
+      "properties": {
+        "stop_id": "103",
+        "stop_code": "3032",
+        "stop_name": "RIVERSIDE 1A (B)",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.669454,
+          45.39673
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RF995",
+      "properties": {
+        "stop_id": "RF995",
+        "stop_code": "3038",
+        "stop_name": "SOUTH KEYS O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.655619,
+          45.35352
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "EB990",
+      "properties": {
+        "stop_id": "EB990",
+        "stop_code": "3025",
+        "stop_name": "ST-LAURENT O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.637847,
+          45.42062
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9527",
+      "properties": {
+        "stop_id": "9527",
+        "stop_code": "3058",
+        "stop_name": "TERRY FOX 4A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.906919,
+          45.309557
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "AE990",
+      "properties": {
+        "stop_id": "AE990",
+        "stop_code": "3024",
+        "stop_name": "TREMBLAY O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.654048,
+          45.416554
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "9476",
+      "properties": {
+        "stop_id": "9476",
+        "stop_code": "3029",
+        "stop_name": "TRIM 1A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.479855,
+          45.49495
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "NA999",
+      "properties": {
+        "stop_id": "NA999",
+        "stop_code": "3011",
+        "stop_name": "TUNNEY'S PASTURE O-TRAIN EAST / EST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.735246,
+          45.403704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CD998",
+      "properties": {
+        "stop_id": "CD998",
+        "stop_code": "3021",
+        "stop_name": "UOTTAWA O-TRAIN WEST / OUEST",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.682776,
+          45.420782
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RE990",
+      "properties": {
+        "stop_id": "RE990",
+        "stop_code": "3069",
+        "stop_name": "UPLANDS O-TRAIN NORTH / NORD",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.655883,
+          45.333006
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "RC990",
+      "properties": {
+        "stop_id": "RC990",
+        "stop_code": "3036",
+        "stop_name": "WALKLEY O-TRAIN",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.665271,
+          45.368483
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "2127",
+      "properties": {
+        "stop_id": "2127",
+        "stop_code": "3012",
+        "stop_name": "WESTBORO A",
+        "wheelchair_boarding": null,
+        "hub": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.753281,
+          45.395765
+        ]
+      }
+    }
+  ],
+  "generator": "padestrian transit_hubs",
+  "source": "stops.geojson",
+  "hub_count": 40
+}

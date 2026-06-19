@@ -121,8 +121,10 @@ python -m venv .venv && .venv\Scripts\activate   # source .venv/bin/activate on 
 pip install -e .
 
 python -m padestrian build-essentials
+python -m padestrian build-transit-hubs          # curated hub stops for transit zones
 python -m padestrian validate-listings
 python -m padestrian build-zones              # 10-min grocery zones (default)
+python -m padestrian build-zones --transit --no-groceries   # 10-min hub transit zones
 python -m padestrian build-zones --minutes 15 # optional: 15-min zones for the slider
 python -m padestrian filter-listings          # score at 10 min → listings-scored.geojson
 
@@ -142,9 +144,10 @@ Open **http://localhost:3000**. Dataset details, Kijiji scrape/prune workflow, a
 
 | Command | What it does |
 |---------|----------------|
-| `build-essentials` | Export transit stops + grocery points |
+| `build-essentials` | Export transit stops, grocery points, and transit hubs |
+| `build-transit-hubs` | Export curated OC Transpo hub stops → `transit-hubs.geojson` |
 | `fetch-groceries` | Pull supermarkets from OpenStreetMap |
-| `build-zones` | Generate walk polygons (`--minutes 10` default; also 15 / 20 for the UI slider) |
+| `build-zones` | Generate walk polygons (`--minutes 10` default; `--transit` uses hubs) |
 | `filter-listings` | Score every listing at 10 min → `listings-scored.geojson` |
 | `validate-listings` | Validate catalog + export map layer |
 | `seed-listings` | Generate the demo rental set |

@@ -15,6 +15,7 @@ from padestrian.ors import fetch_walking_isochrone
 from padestrian.paths import (
     GROCERIES_POINTS_PATH,
     STOPS_GEOJSON_PATH,
+    TRANSIT_HUBS_GEOJSON_PATH,
     ZONES_CACHE_DIR,
     ZONES_DIR,
     minute_tag,
@@ -189,6 +190,23 @@ def _build_layer(
     return stats, output
 
 
+def _resolve_transit_source(
+    *,
+    transit_hubs: bool,
+    transit_all: bool,
+) -> Path:
+    if transit_all:
+        return STOPS_GEOJSON_PATH
+    if transit_hubs:
+        if TRANSIT_HUBS_GEOJSON_PATH.is_file():
+            return TRANSIT_HUBS_GEOJSON_PATH
+        raise FileNotFoundError(
+            f"Missing {TRANSIT_HUBS_GEOJSON_PATH}. "
+            "Run: python -m padestrian build-transit-hubs"
+        )
+    return STOPS_GEOJSON_PATH
+
+
 def run_build_zones(
     *,
     minutes: float = 10.0,
@@ -196,6 +214,8 @@ def run_build_zones(
     transit: bool = False,
     grocery_limit: int | None = None,
     transit_limit: int | None = None,
+    transit_hubs: bool = True,
+    transit_all: bool = False,
     delay_seconds: float = 1.2,
     force: bool = False,
     dry_run: bool = False,
@@ -203,7 +223,9 @@ def run_build_zones(
     """
     Fetch ORS walking isochrones and write merged zone layers under data/zones/.
 
-    Groceries default on; transit default off (5.8k stops — use --transit with --transit-limit).
+    Groceries default on; transit default off.
+    Transit defaults to curated hub stops (see build-transit-hubs); use --transit-all
+    with --transit-limit for the legacy first-N-stops behaviour.
     """
     if not groceries and not transit:
         raise ValueError("Enable at least one of groceries or transit")
@@ -239,15 +261,20 @@ def run_build_zones(
                 result.outputs.append(path)
 
         if transit:
-            print(f"Transit stops ({minutes:g} min walk)…")
+            transit_source = _resolve_transit_source(
+                transit_hubs=transit_hubs,
+                transit_all=transit_all,
+            )
+            label = "Transit hubs" if transit_source == TRANSIT_HUBS_GEOJSON_PATH else "Transit stops"
+            print(f"{label} ({minutes:g} min walk)…")
             stats, path = _build_layer(
                 "transit",
-                STOPS_GEOJSON_PATH,
+                transit_source,
                 minutes=minutes,
                 delay_seconds=delay_seconds,
                 force=force,
                 dry_run=dry_run,
-                limit=transit_limit,
+                limit=transit_limit if transit_all else None,
                 client=shared_client,
             )
             result.layers.append(stats)

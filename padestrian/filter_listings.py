@@ -11,8 +11,8 @@ Zone sources (in priority order):
   1. data/zones/grocery-10min.geojson   (from build-zones)
   2. data/isochrones/smoke.geojson       (smoke fallback — partial coverage)
 
-Transit note: `build-zones --transit` often runs with --transit-limit (~200 stops),
-so polygon coverage is sparse. Nearest-stop fallback uses all of stops.geojson.
+Transit note: `build-zones --transit` uses curated hub stops (`transit-hubs.geojson`).
+Nearest-stop fallback uses all of stops.geojson.
 
 Run:
     python -m padestrian filter-listings
