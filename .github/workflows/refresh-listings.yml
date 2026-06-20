@@ -6,7 +6,7 @@ on:
   workflow_dispatch:         # run manually from GitHub Actions tab anytime
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   refresh:
@@ -38,41 +38,26 @@ jobs:
         env:
           ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
           MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LISTINGS_BACKEND: supabase
         run: |
           python -m padestrian scrape-listings --append
           python -m padestrian prune-kijiji
           python -m padestrian backfill-bathrooms --fetch
           python -m padestrian validate-listings
           python -m padestrian filter-listings
+          python -m padestrian export-listings --output public/data/listings-scored.geojson
 
-      - name: Copy listing outputs to public/data
+      - name: Verify Supabase listing count
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          set -euo pipefail
-          mkdir -p public/data
-          for f in listings-scored.geojson listings.json listings.kijiji.json listings.geojson; do
-            if [ ! -f "data/$f" ]; then
-              echo "ERROR: pipeline did not produce data/$f" >&2
-              exit 1
-            fi
-            cp "data/$f" "public/data/$f"
-            echo "Copied $f"
-          done
           python -c "
-          import json
-          d = json.load(open('public/data/listings-scored.geojson'))
-          print('generated_at:', d.get('generated_at'))
-          print('total:', d.get('total'), 'eligible:', d.get('eligible'))
+          from padestrian.db import fetch_active_listings
+          rows = fetch_active_listings()
+          eligible = sum(1 for r in rows if r.get('eligible'))
+          print(f'active: {len(rows)}, eligible: {eligible}')
+          assert len(rows) > 0, 'no active listings in Supabase'
           "
-
-      - name: Commit and push
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/listings-scored.geojson public/data/listings.json public/data/listings.kijiji.json public/data/listings.geojson
-          if git diff --staged --quiet; then
-            echo "ERROR: no listing changes to commit — refresh may not have updated data" >&2
-            exit 1
-          fi
-          git commit -m "chore: refresh listings $(date -u +%Y-%m-%d)"
-          git push

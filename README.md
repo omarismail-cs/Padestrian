@@ -115,10 +115,15 @@ No database. Datasets are GeoJSON and JSON on disk, rebuilt with a CLI and serve
 ```bash
 cp .env.example .env
 # ORS_API_KEY, MAPBOX_ACCESS_TOKEN in .env
+# SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY in .env
 # NEXT_PUBLIC_MAPBOX_TOKEN in .env.local (same Mapbox token)
 
 python -m venv .venv && .venv\Scripts\activate   # source .venv/bin/activate on macOS/Linux
 pip install -e .
+
+# One-time: run supabase/migrations/001_listings.sql in Supabase SQL editor, then:
+python -m padestrian seed-db
+python -m padestrian filter-listings          # write 10-min scores to Supabase
 
 python -m padestrian build-essentials
 python -m padestrian build-transit-hubs          # curated hub stops for transit zones
@@ -148,7 +153,9 @@ Open **http://localhost:3000**. Dataset details, Kijiji scrape/prune workflow, a
 | `build-transit-hubs` | Export curated OC Transpo hub stops → `transit-hubs.geojson` |
 | `fetch-groceries` | Pull supermarkets from OpenStreetMap |
 | `build-zones` | Generate walk polygons (`--minutes 10` default; `--transit` uses hubs) |
-| `filter-listings` | Score every listing at 10 min → `listings-scored.geojson` |
+| `filter-listings` | Score every listing at 10 min (Supabase or GeoJSON) |
+| `seed-db` | Import `listings.json` into Supabase (one-time bootstrap) |
+| `export-listings` | Export active Supabase listings to GeoJSON |
 | `validate-listings` | Validate catalog + export map layer |
 | `seed-listings` | Generate the demo rental set |
 | `scrape-listings` | Import ads from Kijiji |

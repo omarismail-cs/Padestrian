@@ -29,6 +29,8 @@ from typing import Any
 
 from shapely.geometry import Point, shape
 
+from padestrian.config import listings_backend
+from padestrian.listings import listings_to_features
 from padestrian.geojson_io import write_feature_collection
 from padestrian.paths import (
     LISTINGS_GEOJSON_PATH,
@@ -111,17 +113,24 @@ def score_listings(
     output_path: Path = LISTINGS_SCORED_PATH,
     *,
     minutes: float = 10.0,
+    export_geojson: bool = True,
 ) -> FilterStats:
     """
-    Load listings GeoJSON, score each point against walk zones, write scored GeoJSON.
+    Score each listing against walk zones. Reads from Supabase or GeoJSON;
+    writes scores back to Supabase and optionally exports listings-scored.geojson.
     """
-    if not listings_path.is_file():
-        raise FileNotFoundError(
-            f"Missing {listings_path}. Run: python -m padestrian validate-listings"
-        )
+    if listings_backend() == "supabase":
+        from padestrian.db import fetch_active_listings, update_scores_batch
 
-    with listings_path.open(encoding="utf-8") as f:
-        fc = json.load(f)
+        rows = fetch_active_listings()
+        fc = {"type": "FeatureCollection", "features": listings_to_features(rows)}
+    else:
+        if not listings_path.is_file():
+            raise FileNotFoundError(
+                f"Missing {listings_path}. Run: python -m padestrian validate-listings"
+            )
+        with listings_path.open(encoding="utf-8") as f:
+            fc = json.load(f)
 
     grocery_polys, grocery_src = _resolve_zone_source(
         "grocery", minutes, smoke_roles={"grocery_zone"}
@@ -138,6 +147,7 @@ def score_listings(
     )
 
     scored_features: list[dict[str, Any]] = []
+    score_updates: list[dict[str, Any]] = []
     for feature in fc.get("features", []):
         geom = feature.get("geometry")
         if not geom or geom.get("type") != "Point":
@@ -175,6 +185,21 @@ def score_listings(
             }
         )
 
+        if listings_backend() == "supabase":
+            listing_id = props.get("id") or feature.get("id")
+            if listing_id:
+                score_updates.append(
+                    {
+                        "id": str(listing_id),
+                        "near_grocery": near_g,
+                        "near_transit": near_t,
+                        "eligible": eligible,
+                        "walk_minutes": minutes,
+                        "transit_via": transit_via or None,
+                        "nearest_stop_m": props.get("nearest_stop_m"),
+                    }
+                )
+
         stats.total += 1
         if near_g:
             stats.near_grocery += 1
@@ -187,21 +212,25 @@ def score_listings(
         if eligible:
             stats.eligible += 1
 
-    write_feature_collection(
-        output_path,
-        scored_features,
-        metadata={
-            "generator": "padestrian filter-listings",
-            "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "walk_minutes": minutes,
-            "grocery_zone_source": grocery_src,
-            "transit_zone_source": transit_src,
-            "transit_stop_count": stats.transit_stop_count,
-            "transit_walk_threshold_m": round(walk_threshold_meters(minutes)),
-            "near_transit_via_zone": stats.near_transit_via_zone,
-            "near_transit_via_stop": stats.near_transit_via_stop,
-            "total": stats.total,
-            "eligible": stats.eligible,
-        },
-    )
+    if listings_backend() == "supabase":
+        update_scores_batch(score_updates)
+
+    if export_geojson:
+        write_feature_collection(
+            output_path,
+            scored_features,
+            metadata={
+                "generator": "padestrian filter-listings",
+                "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "walk_minutes": minutes,
+                "grocery_zone_source": grocery_src,
+                "transit_zone_source": transit_src,
+                "transit_stop_count": stats.transit_stop_count,
+                "transit_walk_threshold_m": round(walk_threshold_meters(minutes)),
+                "near_transit_via_zone": stats.near_transit_via_zone,
+                "near_transit_via_stop": stats.near_transit_via_stop,
+                "total": stats.total,
+                "eligible": stats.eligible,
+            },
+        )
     return stats

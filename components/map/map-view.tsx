@@ -175,9 +175,10 @@ export function MapView({
 
   // Load core data on mount
   useEffect(() => {
-    // Listings: prefer scored, fall back to unscored
-    fetch("/data/listings-scored.geojson")
+    // Listings: live Supabase API, fall back to static GeoJSON
+    fetch("/api/listings")
       .then(r => r.ok ? r.json() : Promise.reject())
+      .catch(() => fetch("/data/listings-scored.geojson").then(r => r.ok ? r.json() : Promise.reject()))
       .catch(() => fetch("/data/listings.geojson").then(r => r.json()))
       .then((d: GeoJSON.FeatureCollection) => {
         setBaseListings(d)

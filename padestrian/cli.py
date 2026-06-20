@@ -17,9 +17,12 @@ from padestrian.zones import run_build_zones
 from padestrian.filter_listings import score_listings
 from padestrian.validate_scoring import print_report, run_validation
 from padestrian.check_mapbox import check_mapbox_token
+from padestrian.config import listings_backend
 from padestrian.listings import (
     ListingValidationError,
     export_listings_geojson,
+    listings_to_features,
+    load_catalog,
     validate_catalog,
     write_seed_catalog,
 )
@@ -264,29 +267,36 @@ def cmd_validate_scoring(args: argparse.Namespace) -> int:
 
 
 def cmd_scrape_listings(args: argparse.Namespace) -> int:
-    """Scrape Kijiji rentals and write data/listings.json with dedupe options."""
-    existing_root: dict[str, object] = {}
-    existing_listings: list[dict[str, object]] = []
-    if LISTINGS_JSON_PATH.is_file():
-        try:
-            with LISTINGS_JSON_PATH.open(encoding="utf-8") as f:
-                payload = json.load(f)
-            if isinstance(payload, dict):
-                existing_root = payload
-                listings = payload.get("listings")
-                if isinstance(listings, list):
-                    existing_listings = [x for x in listings if isinstance(x, dict)]
-            elif isinstance(payload, list):
-                existing_listings = [x for x in payload if isinstance(x, dict)]
-        except (OSError, json.JSONDecodeError) as exc:
-            print(f"Failed to read {LISTINGS_JSON_PATH}: {exc}", file=sys.stderr)
-            return 1
+    """Scrape Kijiji rentals and upsert new listings (Supabase or JSON)."""
+    from padestrian.config import listings_backend as backend
 
-    known_ids = {
-        str(row.get("id"))
-        for row in existing_listings
-        if isinstance(row.get("id"), str) and str(row.get("id")).startswith("kijiji-")
-    }
+    if backend() == "supabase":
+        from padestrian.db import fetch_kijiji_ids, upsert_listings
+
+        known_ids = fetch_kijiji_ids()
+    else:
+        existing_root: dict[str, object] = {}
+        existing_listings: list[dict[str, object]] = []
+        if LISTINGS_JSON_PATH.is_file():
+            try:
+                with LISTINGS_JSON_PATH.open(encoding="utf-8") as f:
+                    payload = json.load(f)
+                if isinstance(payload, dict):
+                    existing_root = payload
+                    listings = payload.get("listings")
+                    if isinstance(listings, list):
+                        existing_listings = [x for x in listings if isinstance(x, dict)]
+                elif isinstance(payload, list):
+                    existing_listings = [x for x in payload if isinstance(x, dict)]
+            except (OSError, json.JSONDecodeError) as exc:
+                print(f"Failed to read {LISTINGS_JSON_PATH}: {exc}", file=sys.stderr)
+                return 1
+
+        known_ids = {
+            str(row.get("id"))
+            for row in existing_listings
+            if isinstance(row.get("id"), str) and str(row.get("id")).startswith("kijiji-")
+        }
 
     discovered = scrape_kijiji_urls(args.pages)
     candidates: list[str] = []
@@ -314,7 +324,7 @@ def cmd_scrape_listings(args: argparse.Namespace) -> int:
             context = browser.new_context()
             page = context.new_page()
             try:
-                for idx, url in enumerate(candidates):
+                for url in candidates:
                     raw = scrape_listing_detail(page, url)
                     listing = normalize_listing(raw)
                     if listing is not None:
@@ -324,6 +334,15 @@ def cmd_scrape_listings(args: argparse.Namespace) -> int:
             finally:
                 context.close()
                 browser.close()
+
+    if backend() == "supabase":
+        if scraped_new:
+            upsert_listings(scraped_new)
+        print(f"Discovered URLs: {len(discovered)}")
+        print(f"Skipped (already known IDs): {skipped_known}")
+        print(f"Scraped + upserted new listings: {len(scraped_new)}")
+        print("  -> Supabase listings table")
+        return 0
 
     if args.append:
         merged = [*existing_listings, *scraped_new]
@@ -362,11 +381,12 @@ def _backfill_bathrooms_in_rows(
     dry_run: bool,
     fetch: bool = False,
     delay: float = 0.8,
-) -> tuple[int, int, int]:
-    """Return (kijiji_total, missing_before, updated)."""
+) -> tuple[int, int, int, list[dict[str, object]]]:
+    """Return (kijiji_total, missing_before, updated, rows_updated)."""
     kijiji_total = 0
     missing_before = 0
     updated = 0
+    rows_updated: list[dict[str, object]] = []
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -398,7 +418,8 @@ def _backfill_bathrooms_in_rows(
             updated += 1
             if not dry_run:
                 row["bathrooms"] = baths
-    return kijiji_total, missing_before, updated
+                rows_updated.append(row)
+    return kijiji_total, missing_before, updated, rows_updated
 
 
 def _load_listings_root(path: Path) -> tuple[dict[str, object], list[dict[str, object]]]:
@@ -425,17 +446,24 @@ def _write_listings_root(path: Path, root: dict[str, object], listings: list[dic
 
 def cmd_backfill_bathrooms(args: argparse.Namespace) -> int:
     """Fill missing bathrooms on Kijiji rows from title/URL text."""
-    if not LISTINGS_JSON_PATH.is_file():
-        print(f"Missing {LISTINGS_JSON_PATH}", file=sys.stderr)
-        return 1
+    if listings_backend() == "supabase":
+        try:
+            data = load_catalog()
+        except Exception as exc:
+            print(exc, file=sys.stderr)
+            return 1
+        listings = [x for x in data.get("listings", []) if isinstance(x, dict)]
+    else:
+        if not LISTINGS_JSON_PATH.is_file():
+            print(f"Missing {LISTINGS_JSON_PATH}", file=sys.stderr)
+            return 1
+        try:
+            _, listings = _load_listings_root(LISTINGS_JSON_PATH)
+        except ListingValidationError as exc:
+            print(exc, file=sys.stderr)
+            return 1
 
-    try:
-        root, listings = _load_listings_root(LISTINGS_JSON_PATH)
-    except ListingValidationError as exc:
-        print(exc, file=sys.stderr)
-        return 1
-
-    total, missing, updated = _backfill_bathrooms_in_rows(
+    total, missing, updated, rows_updated = _backfill_bathrooms_in_rows(
         listings,
         dry_run=args.dry_run,
         fetch=args.fetch,
@@ -443,21 +471,31 @@ def cmd_backfill_bathrooms(args: argparse.Namespace) -> int:
     )
 
     if not args.dry_run:
-        _write_listings_root(LISTINGS_JSON_PATH, root, listings)
+        if listings_backend() == "supabase":
+            from padestrian.db import upsert_listings
 
-        if KIJIJI_LISTINGS_PATH.is_file():
-            k_root, k_listings = _load_listings_root(KIJIJI_LISTINGS_PATH)
-            _, _, k_updated = _backfill_bathrooms_in_rows(
-                k_listings,
-                dry_run=False,
-                fetch=args.fetch,
-                delay=max(0.0, args.delay),
-            )
-            _write_listings_root(KIJIJI_LISTINGS_PATH, k_root, k_listings)
-            print(f"Kijiji snapshot: updated {k_updated} row(s) in {KIJIJI_LISTINGS_PATH}")
+            if rows_updated:
+                upsert_listings(rows_updated)
+        else:
+            root, _ = _load_listings_root(LISTINGS_JSON_PATH)
+            _write_listings_root(LISTINGS_JSON_PATH, root, listings)
+
+            if KIJIJI_LISTINGS_PATH.is_file():
+                k_root, k_listings = _load_listings_root(KIJIJI_LISTINGS_PATH)
+                _, _, k_updated, _ = _backfill_bathrooms_in_rows(
+                    k_listings,
+                    dry_run=False,
+                    fetch=args.fetch,
+                    delay=max(0.0, args.delay),
+                )
+                _write_listings_root(KIJIJI_LISTINGS_PATH, k_root, k_listings)
+                print(f"Kijiji snapshot: updated {k_updated} row(s) in {KIJIJI_LISTINGS_PATH}")
 
     prefix = "Would update" if args.dry_run else "Updated"
+    dest = "Supabase" if listings_backend() == "supabase" else str(LISTINGS_JSON_PATH)
     print(f"{prefix} {updated} / {missing} Kijiji listings missing bathrooms ({total} Kijiji total)")
+    if not args.dry_run and updated:
+        print(f"  -> {dest}")
     if updated < missing:
         hint = "title/URL"
         if args.fetch:
@@ -465,6 +503,59 @@ def cmd_backfill_bathrooms(args: argparse.Namespace) -> int:
         print(f"  {missing - updated} still have no parseable bathroom count in {hint}")
     if not args.dry_run and updated:
         print("Next: python -m padestrian validate-listings && python -m padestrian filter-listings")
+    return 0
+
+
+def cmd_seed_db(args: argparse.Namespace) -> int:
+    """Import data/listings.json into Supabase (one-time bootstrap)."""
+    from padestrian.db import upsert_listings
+
+    path = Path(args.input)
+    if not path.is_file():
+        print(f"Missing {path}", file=sys.stderr)
+        return 1
+    with path.open(encoding="utf-8") as f:
+        data = json.load(f)
+    listings = [x for x in data.get("listings", []) if isinstance(x, dict)]
+    if not listings:
+        print("No listings found in input file", file=sys.stderr)
+        return 1
+    if args.dry_run:
+        print(f"Dry run: would upsert {len(listings)} listings")
+        return 0
+    count = upsert_listings(listings)
+    print(f"Seeded {count} listings to Supabase")
+    print("Next: python -m padestrian filter-listings")
+    return 0
+
+
+def cmd_export_listings(args: argparse.Namespace) -> int:
+    """Export active Supabase listings to GeoJSON."""
+    from datetime import datetime, timezone
+
+    from padestrian.db import fetch_active_listings
+    from padestrian.geojson_io import write_feature_collection
+
+    rows = fetch_active_listings()
+    features = listings_to_features(rows)
+    output = Path(args.output)
+    scored = any(r.get("near_grocery") is not None for r in rows)
+    metadata: dict[str, object] = {
+        "city": "Ottawa, ON",
+        "source": "supabase",
+        "listingCount": len(features),
+    }
+    if scored:
+        metadata.update(
+            {
+                "generator": "padestrian export-listings",
+                "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "total": len(features),
+                "eligible": sum(1 for r in rows if r.get("eligible")),
+            }
+        )
+    write_feature_collection(output, features, metadata=metadata)
+    print(f"Wrote {len(features)} listings -> {output}")
     return 0
 
 
@@ -742,6 +833,33 @@ def main(argv: list[str] | None = None) -> int:
         help="Seconds between HTTP fetches when --fetch (default: 0.8)",
     )
     backfill_baths_parser.set_defaults(func=cmd_backfill_bathrooms)
+
+    seed_db_parser = subparsers.add_parser(
+        "seed-db",
+        help="Import listings.json into Supabase (one-time bootstrap)",
+    )
+    seed_db_parser.add_argument(
+        "--input",
+        default=str(LISTINGS_JSON_PATH),
+        help="Source JSON catalog (default: data/listings.json)",
+    )
+    seed_db_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print count without writing to Supabase",
+    )
+    seed_db_parser.set_defaults(func=cmd_seed_db)
+
+    export_listings_parser = subparsers.add_parser(
+        "export-listings",
+        help="Export active Supabase listings to GeoJSON",
+    )
+    export_listings_parser.add_argument(
+        "--output",
+        default=str(LISTINGS_SCORED_PATH),
+        help="Output GeoJSON path (default: data/listings-scored.geojson)",
+    )
+    export_listings_parser.set_defaults(func=cmd_export_listings)
 
     use_parser = subparsers.add_parser(
         "use-listings",

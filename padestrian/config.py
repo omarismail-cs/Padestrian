@@ -1,9 +1,11 @@
 import os
-from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
 
 from padestrian.paths import PROJECT_ROOT
+
+ListingsBackend = Literal["file", "supabase"]
 
 
 def load_env(*, fresh: bool = False) -> None:
@@ -17,3 +19,21 @@ def require_env(name: str, *, fresh: bool = False) -> str:
     if not value:
         raise RuntimeError(f"{name} is not set. Add it to .env (see .env.example).")
     return value
+
+
+def listings_backend(*, fresh: bool = False) -> ListingsBackend:
+    """Return catalog storage backend (file JSON or Supabase)."""
+    load_env(fresh=fresh)
+    explicit = os.getenv("LISTINGS_BACKEND", "").strip().lower()
+    if explicit == "file":
+        return "file"
+    if explicit == "supabase":
+        return "supabase"
+    if os.getenv("SUPABASE_URL", "").strip() and os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip():
+        return "supabase"
+    return "file"
+
+
+def supabase_configured(*, fresh: bool = False) -> bool:
+    load_env(fresh=fresh)
+    return bool(os.getenv("SUPABASE_URL", "").strip() and os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip())

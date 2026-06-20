@@ -16,6 +16,7 @@ from padestrian.geojson_io import write_feature_collection
 from padestrian.municipal_addresses import load_municipal_points
 from padestrian.osm_addresses import load_residential_points
 from padestrian.gtfs_stops import OTTAWA_BBOX, _in_ottawa_bbox as _in_bbox
+from padestrian.config import listings_backend
 from padestrian.paths import LISTINGS_GEOJSON_PATH, LISTINGS_JSON_PATH
 
 REQUIRED_FIELDS = ("id", "address", "lat", "lon", "rent_cad", "bedrooms")
@@ -39,12 +40,21 @@ def _load_catalog(path: Path = LISTINGS_JSON_PATH) -> dict[str, Any]:
 
 
 def load_catalog(path: Path = LISTINGS_JSON_PATH) -> dict[str, Any]:
-    """Load listings.json root object."""
+    """Load listings catalog (JSON file or Supabase)."""
+    if listings_backend() == "supabase":
+        from padestrian.db import fetch_catalog_dict
+
+        return fetch_catalog_dict()
     return _load_catalog(path)
 
 
 def save_catalog(data: dict[str, Any], path: Path = LISTINGS_JSON_PATH) -> None:
-    """Write listings.json (and trailing newline)."""
+    """Write listings catalog (JSON file or Supabase upsert)."""
+    if listings_backend() == "supabase":
+        from padestrian.db import save_catalog_to_db
+
+        save_catalog_to_db(data)
+        return
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -102,7 +112,12 @@ def validate_listing(row: dict[str, Any], index: int) -> list[str]:
 
 
 def validate_catalog(path: Path = LISTINGS_JSON_PATH) -> tuple[dict[str, Any], list[str]]:
-    data = _load_catalog(path)
+    if listings_backend() == "supabase":
+        from padestrian.db import fetch_catalog_dict
+
+        data = fetch_catalog_dict()
+    else:
+        data = _load_catalog(path)
     listings = data["listings"]
     errors: list[str] = []
     seen_ids: set[str] = set()
@@ -135,6 +150,18 @@ def listing_to_feature(row: dict[str, Any]) -> dict[str, Any]:
         props["bathrooms"] = float(row["bathrooms"])
     if row.get("url"):
         props["url"] = row["url"]
+    if row.get("near_grocery") is not None:
+        props["near_grocery"] = bool(row["near_grocery"])
+    if row.get("near_transit") is not None:
+        props["near_transit"] = bool(row["near_transit"])
+    if row.get("eligible") is not None:
+        props["eligible"] = bool(row["eligible"])
+    if row.get("walk_minutes") is not None:
+        props["walk_minutes"] = float(row["walk_minutes"])
+    if row.get("transit_via"):
+        props["transit_via"] = row["transit_via"]
+    if row.get("nearest_stop_m") is not None:
+        props["nearest_stop_m"] = int(row["nearest_stop_m"])
 
     lon, lat = float(row["lon"]), float(row["lat"])
     return {
@@ -169,6 +196,11 @@ def export_listings_geojson(
         "rent_min": int(min(rents)),
         "rent_max": int(max(rents)),
     }
+
+
+def listings_to_features(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Convert catalog rows to GeoJSON Point features."""
+    return [listing_to_feature(row) for row in rows]
 
 
 # Demo seed — neighborhood center (lon, lat) + streets that actually exist in that area.

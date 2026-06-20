@@ -63,6 +63,8 @@ Re-run the command after refreshing raw GTFS or Overpass exports.
 
 ## listings.json / listings.geojson
 
+**Live catalog:** Kijiji + demo listings are stored in **Supabase** (`listings` table with PostGIS points). The map loads them via `GET /api/listings`. Static `public/data/listings-scored.geojson` remains as a fallback when Supabase is not configured.
+
 Demo rental catalog for Ottawa (~180 mock listings). **Not live scrapes** — seeded for demos and recruiter loads.
 
 | File | Role |
