@@ -363,7 +363,7 @@ export function FilterPanel({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={logoIcon}
-          alt="Padestrian"
+          alt="padestrian"
           width={28}
           height={28}
           className="shrink-0"
@@ -405,7 +405,7 @@ export function FilterPanel({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoLockup}
-              alt="Padestrian"
+              alt="padestrian"
               height={28}
               className="h-7 w-auto max-w-[200px] object-contain object-left"
             />

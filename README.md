@@ -1,7 +1,7 @@
-# Padestrian
+# padestrian
 
 <p align="center">
-  <img src="public/images/logo-lockup-green-banner.png" alt="Padestrian — Ottawa walkable rentals" width="520" />
+  <img src="public/images/logo-lockup-green-banner.png" alt="padestrian — ottawa walkable rentals" width="520" />
 </p>
 
 > **Live app:** [padestrian.vercel.app](https://padestrian.vercel.app)  
@@ -15,26 +15,26 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Mapbox](https://img.shields.io/badge/Mapbox-4264FB?style=flat-square&logo=mapbox&logoColor=white)
 
-**Where can I rent and still walk to the bus and the store?** Padestrian is a full-stack Ottawa rental explorer built around that question — and a simple idea: **walkability should mean a real walk**, not a straight line on a map. Most listing sites hand you a generic score that ignores highways, missing sidewalks, and how long winter walks actually feel. This project scores each apartment using **pedestrian routing**, official **transit stop data**, and real **grocery locations**, then shows you the results instantly.
+**Where can I rent and still walk to the bus and the store?** padestrian is a full-stack Ottawa rental explorer built around that question — and a simple idea: **walkability should mean a real walk**, not a straight line on a map. Most listing sites hand you a generic score that ignores highways, missing sidewalks, and how long winter walks actually feel. This project scores each apartment using **pedestrian routing**, official **transit stop data**, and real **grocery locations**, then shows you the results instantly.
 
 ## Screenshots
 
 **Map** — color-coded rentals, groceries, transit stops, and listing cards with walkability badges.
 
-<img src="public/images/screenshot-map.png" alt="Padestrian map with walkable listing popup" width="100%" />
+<img src="public/images/screenshot-map.png" alt="padestrian map with walkable listing popup" width="100%" />
 
-**Sidebar** — address check, walk-time slider, rent histogram, layers, and Kijiji sources.
+**Sidebar** — logo, address check, walk-time slider, rent/bedroom filters, map layers, and Kijiji import.
 
 <table>
   <tr>
     <td width="33%" align="center" valign="top">
-      <img src="public/images/screenshot-sidebar-walktime.png" alt="Walk time slider and address check" width="100%" />
+      <img src="public/images/screenshot-sidebar-walktime.png" alt="padestrian header, address check, and walk-time slider" width="100%" />
     </td>
     <td width="33%" align="center" valign="top">
-      <img src="public/images/screenshot-sidebar-rent.png" alt="Max rent histogram and bedroom filters" width="100%" />
+      <img src="public/images/screenshot-sidebar-filters.png" alt="Max rent, bedrooms, legend, layers, and listing sources" width="100%" />
     </td>
     <td width="34%" align="center" valign="top">
-      <img src="public/images/screenshot-sidebar-layers.png" alt="Legend, map layers, and listing sources" width="100%" />
+      <img src="public/images/screenshot-sidebar-kijiji.png" alt="Kijiji live listings and personal URL import" width="100%" />
     </td>
   </tr>
 </table>
@@ -49,7 +49,7 @@ Apartment hunting without a car usually means:
 - Guessing whether “15 minutes to transit” includes a fence, a parking lot, or a road with no sidewalk  
 - No single view of **price + location + grocery + bus** at once  
 
-Padestrian puts that in one place: hover a pin, see rent and address, know at a glance if the listing is walkable to **both** transit and a full grocery store.
+padestrian puts that in one place: hover a pin, see rent and address, know at a glance if the listing is walkable to **both** transit and a full grocery store.
 
 ---
 

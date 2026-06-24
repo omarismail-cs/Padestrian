@@ -5,7 +5,7 @@ import './globals.css'
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
 export const metadata: Metadata = {
-  title: 'Padestrian — Walkable Rentals',
+  title: 'padestrian — walkable rentals',
   description: 'Find car-free apartments near transit and groceries in Ottawa',
   icons: {
     icon: [
