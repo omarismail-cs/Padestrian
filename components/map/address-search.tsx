@@ -21,7 +21,6 @@ interface AddressSearchProps {
   isChecking: boolean
   error: string | null
   onCheckQuery: (query: string) => void
-  onSelectAddress: (result: GeocodeResult) => void
   onClear: () => void
 }
 
@@ -31,7 +30,6 @@ export function AddressSearch({
   isChecking,
   error,
   onCheckQuery,
-  onSelectAddress,
   onClear,
 }: AddressSearchProps) {
   const [query, setQuery] = useState("")
@@ -85,14 +83,10 @@ export function AddressSearch({
     return () => document.removeEventListener("mousedown", onPointerDown)
   }, [closeDropdown])
 
-  const pickSuggestion = useCallback(
-    (result: GeocodeResult) => {
-      setQuery(result.label)
-      closeDropdown()
-      onSelectAddress(result)
-    },
-    [closeDropdown, onSelectAddress],
-  )
+  const pickSuggestion = useCallback((result: GeocodeResult) => {
+    setQuery(result.label)
+    closeDropdown()
+  }, [closeDropdown])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -201,8 +195,8 @@ export function AddressSearch({
             id={listId}
             role="listbox"
             className={cn(
-              "absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden",
-              "rounded-xl border border-border bg-card/98 shadow-xl backdrop-blur-xl",
+              "absolute left-0 right-0 top-[calc(100%+6px)] z-50",
+              "rounded-xl border border-border bg-card shadow-xl",
             )}
           >
             {isLoadingSuggestions ? (
@@ -221,8 +215,11 @@ export function AddressSearch({
                     <button
                       type="button"
                       id={`address-suggestion-${index}`}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => pickSuggestion(hit)}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        pickSuggestion(hit)
+                      }}
                       className={cn(
                         "flex w-full items-start gap-2.5 px-3 py-2.5 text-left text-sm transition-colors",
                         activeIndex === index

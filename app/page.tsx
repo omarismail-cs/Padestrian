@@ -200,13 +200,6 @@ export default function Page() {
     [applyGeocodedAddress],
   )
 
-  const handleSelectAddress = useCallback(
-    (geocoded: GeocodeResult) => {
-      void applyGeocodedAddress(geocoded)
-    },
-    [applyGeocodedAddress],
-  )
-
   const handleClearCustomAddress = useCallback(() => {
     setCustomListing(null)
     clearCustomAddressStorage()
@@ -285,7 +278,6 @@ export default function Page() {
         isCheckingAddress={isCheckingAddress}
         addressError={addressError}
         onCheckAddressQuery={handleCheckAddressQuery}
-        onSelectAddress={handleSelectAddress}
         onClearCustomAddress={handleClearCustomAddress}
         listingsData={listingsData}
         listingsUpdatedAt={listingsUpdatedAt ?? undefined}

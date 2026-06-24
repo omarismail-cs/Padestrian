@@ -7,7 +7,6 @@ import { Slider } from "@/components/ui/slider"
 import { PedestrianToggle } from "@/components/ui/pedestrian-toggle"
 import { AddressSearch } from "@/components/map/address-search"
 import { KijijiListPanel } from "@/components/map/kijiji-list-panel"
-import type { GeocodeResult } from "@/lib/geocode"
 import { buildKijijiListItems, type KijijiListItem } from "@/lib/kijiji-listings"
 import type { WalkMinutes } from "@/lib/score-point"
 import { cn } from "@/lib/utils"
@@ -74,7 +73,6 @@ interface FilterPanelProps {
   isCheckingAddress: boolean
   addressError: string | null
   onCheckAddressQuery: (query: string) => void
-  onSelectAddress: (result: GeocodeResult) => void
   onClearCustomAddress: () => void
   listingsData: FeatureCollection | null
   listingsUpdatedAt?: string
@@ -151,7 +149,6 @@ export function FilterPanel({
   isCheckingAddress,
   addressError,
   onCheckAddressQuery,
-  onSelectAddress,
   onClearCustomAddress,
   listingsData,
   listingsUpdatedAt,
@@ -437,7 +434,7 @@ export function FilterPanel({
         {/* Scrollable content */}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="p-5 space-y-5 pb-4">
-            <div style={section(120)}>
+            <div className="relative z-30" style={section(120)}>
               <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-zinc-300 mb-3">
                 Check an address
               </div>
@@ -447,7 +444,6 @@ export function FilterPanel({
                 isChecking={isCheckingAddress}
                 error={addressError}
                 onCheckQuery={onCheckAddressQuery}
-                onSelectAddress={onSelectAddress}
                 onClear={onClearCustomAddress}
               />
             </div>
